@@ -1,11 +1,19 @@
-# <p align="center">🕵️‍♂️ DECEPTICON: The Ultimate Vibe Hacking Agent</p>
+# <p align="center"><img src="assets/logo_banner.png" alt="DECEPTICON Banner" width="800"></p>
+
+<h1 align="center">🕵️‍♂️ DECEPTICON: The Ultimate Vibe Hacking Agent</h1>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-1.0.0-red?style=for-the-badge" alt="Version">
-  <img src="https://img.shields.io/badge/Security-Advanced-cyan?style=for-the-badge" alt="Security">
-  <img src="https://img.shields.io/badge/AI-Multi--Model-magenta?style=for-the-badge" alt="AI">
-  <img src="https://img.shields.io/badge/Platform-Windows%20%2F%20Linux-blue?style=for-the-badge" alt="Platform">
-  <img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge" alt="License">
+  <a href="https://github.com/PurpleAILAB/Decepticon">
+    <img src="https://img.shields.io/badge/Version-1.0.0-red?style=for-the-badge&logoColor=white" alt="Version">
+  </a>
+  <img src="https://img.shields.io/badge/Security-Advanced-cyan?style=for-the-badge&logo=securityscorecard&logoColor=white" alt="Security">
+  <img src="https://img.shields.io/badge/AI-Multi--Model-magenta?style=for-the-badge&logo=openai&logoColor=white" alt="AI">
+  <img src="https://img.shields.io/badge/Platform-Windows%20%2F%20Linux-blue?style=for-the-badge&logo=osmc&logoColor=white" alt="Platform">
+  <img src="https://img.shields.io/badge/License-Apache_2.0-green?style=for-the-badge&logo=apache&logoColor=white" alt="License">
+</p>
+
+<p align="center">
+  <strong>Orchestrate a swarm of elite AI agents for autonomous red teaming, reconnaissance, and technical exploitation.</strong>
 </p>
 
 ---
@@ -14,90 +22,47 @@
 
 **DECEPTICON** is a cutting-edge, AI-powered red teaming and security reconnaissance system. Engineered for professional security operators, it orchestrates a swarm of specialized AI agents to autonomously discover, analyze, and exploit vulnerabilities using a **"Vibe Hacking"** methodology—a fusion of behavioral intelligence and technical exploit precision.
 
-<p align="center">
-  <img src="assets/cli_screenshot.png" alt="DECEPTICON Tactical CLI" width="900">
-  <br>
-  <i>The DECEPTICON Tactical CLI in action</i>
-</p>
-
 Unlike manual reconnaissance tools, **DECEPTICON** functions as a high-level supervisor, delegating complex technical chains to a dynamic agent mesh that self-corrects and adapts to target defenses in real-time.
+
+<p align="center">
+  <img src="assets/main.png" alt="DECEPTICON Dashboard" width="900">
+  <br>
+  <i>The DECEPTICON Autonomous Command Center</i>
+</p>
 
 ---
 
 ## ✨ Key Features
 
 ### 🎯 Multi-Agent Swarm Orchestration
-Deploy a coordinated "swarm" of agents that communicate through a shared state. The swarm self-organizes based on the mission objective, ensuring that reconnaissance findings directly inform initial access attempts without manual intervention.
+Deploy a coordinated "swarm" of agents that communicate through a shared state. The swarm self-organizes based on the mission objective, ensuring that reconnaissance findings directly inform initial access attempts.
 
 ### 🌐 Universal LLM Mesh
-Connect to any elite LLM provider to power your agents:
-- **Cloud Powerhouses**: Direct integration with GPT-4o, Claude 3.7 Sonnet, and OpenAI o1-series.
-- **OpenRouter Gateway**: Access DeepSeek V3, R1, Mistral Large, and Llama 3.1 405B via a single API.
-- **Local Privacy**: Run small, specialized models (Llama 3, Phi-3, Mistral) locally via Ollama.
+Connect to any elite LLM provider:
+- **Cloud Models**: GPT-4o, Claude 3.7 Sonnet, OpenAI o1-series.
+- **Unified Gateway**: Access DeepSeek V3/R1, Mistral, and Llama 3.1 via **OpenRouter**.
+- **Local Privacy**: Native support for **Ollama** (Llama 3, Mistral, Phi-3).
 
 ### 🛠️ Native MCP Infrastructure
-Deep-native support for the **Model Context Protocol (MCP)** allows DECEPTICON to "plug in" to any environment:
-- **System Control**: Direct terminal execution and file system manipulation.
-- **Intelligence**: Real-time web-search and OSINT gathering.
-- **Tool Expansion**: Easily add new security tools (Nmap, Metasploit, etc.) as MCP servers.
-
----
-
-## 📖 How To Work With DECEPTICON (Example Mission)
-
-A typical security mission with DECEPTICON follows a structured, autonomous lifecycle. Here is a step-by-step example of how to execute a reconnaissance mission.
-
-### Step 1: Initialization
-Launch the tactical CLI and select your preferred LLM model (e.g., **DeepSeek V3 via OpenRouter** for high-efficiency reasoning).
-
-```bash
-python frontend/cli/cli.py
-```
-
-### Step 2: Set the Mission Objective
-Once the session is ready, provide a high-level goal. You don't need to give specific commands—just describe what you want to achieve.
-
-**Operator:** *"Perform a fast scan and vulnerability assessment for the local network 172.10.0.0/24. Focus on web servers and database ports."*
-
-### Step 3: Autonomous Orchestration
-The **Planner Agent** will analyze your request and break it down into tasks:
-1.  **Recon Agent** starts an `nmap -F` scan via the Terminal MCP server.
-2.  **Researcher Agent** monitors the scan results; if a web server is found, it automatically checks the service versions against known CVE databases.
-3.  **Access Agent** (if enabled) might attempt a non-intrusive metadata pull or credential check on discovered services.
-
-### Step 4: Real-time Analysis & Reporting
-As findings are logged, the **Summary Agent** compiles everything into a tactical report. You can ask for updates at any time:
-
-**Operator:** *"What is the current status of the 172.10.0.3 target?"*
-**DECEPTICON:** *"Target 172.10.0.3 is up. Ports 80 and 443 are open. Running Nginx 1.18.0. Researcher detected a potential misconfiguration in the SSL headers. Proceeding with detailed vuln-scan..."*
-
-### Step 5: Mission Debrief
-Upon completion, DECEPTICON generates a final markdown report of all findings, which you can export for your red team documentation.
-
----
-
-## 🧠 Core Agent Roles
-
-| Agent | Mission Specialist | Capabilities |
-|---|---|---|
-| **Reconnaissance** | The Scout | Port scanning, service enumeration, DNS lookups, and vuln-scanning. |
-| **Initial Access** | The Breacher | Credential stuffing, exploit execution, and payload delivery. |
-| **Researcher** | The Analyst | Zero-day research, CVE analysis, and documentation synthesis. |
-| **Planner** | The Architect | High-level mission planning and multi-stage workflow orchestration. |
-| **Summary** | The Reporter | Intelligence compilation and comprehensive executive reporting. |
+Deep-native support for the **Model Context Protocol (MCP)**:
+- **Direct Control**: Terminal execution and filesystem manipulation via specialized servers.
+- **Live Intelligence**: Real-time web-search and OSINT gathering.
+- **Extensible**: Integrate custom tools (Nmap, Metasploit, etc.) as MCP servers.
 
 ---
 
 ## 🧩 Advanced Architecture
 
+DECEPTICON utilizes **LangGraph** to manage the state and transitions between different agent roles, creating a robust, cyclic workflow that mimics a professional red team operation.
+
 ```mermaid
 graph TD
-    User([Security Operator]) --> CLI[Tactical CLI Interface]
-    CLI --> Core[Orchestration Engine]
+    User([Security Operator]) --> UI[Command Interface]
+    UI --> Core[Orchestration Engine]
     Core --> Memory[Persistent Vector Memory]
-    Core --> Mesh[Agent Mesh]
+    Core --> Mesh[Agent Swarm]
     
-    subgraph "Agent Mesh"
+    subgraph "Agent Swarm"
         PA[Planner Agent]
         RA[Recon Agent]
         IA[Access Agent]
@@ -105,10 +70,6 @@ graph TD
     end
     
     Mesh --> LLM{LLM Gateway}
-    LLM --> OR[OpenRouter API]
-    LLM --> AZ[OpenAI / Anthropic]
-    LLM --> OL[Local Ollama]
-    
     Mesh --> MCP[MCP Adapter]
     MCP --> Tools[Security Toolsets]
 ```
@@ -117,28 +78,90 @@ graph TD
 
 ## 🚦 Installation & Setup
 
-1. **Clone & Sync:**
+### 1. Prerequisites
+- **Python**: 3.11 or higher.
+- **UV**: (Highly Recommended) For lightning-fast dependency management.
+- **Docker**: For running target lab environments.
+
+### 2. Local Setup (Windows/Linux)
+
 ```bash
+# Clone the repository
 git clone https://github.com/PurpleAILAB/Decepticon.git
 cd Decepticon
+
+# Install dependencies using UV
 uv sync
+
+# Alternatively, using pip
+# pip install -r requirements.txt
 ```
 
-2. **Keys:** Populate `.env` with `OPENAI_API_KEY`, `OPENROUTER_API_KEY`, etc.
+### 3. Configuration
+Copy the `.env.example` to `.env` and populate your API keys:
 
-3. **Deploy Target Environment (Optional):**
 ```bash
-docker-compose up -d
+cp .env.example .env
+```
+
+| Variable | Description |
+|---|---|
+| `OPENAI_API_KEY` | Needed for GPT-4o / Reasoning models |
+| `OPENROUTER_API_KEY` | Gateway for DeepSeek, Llama, and more |
+| `ANTHROPIC_API_KEY` | For Claude 3.5/3.7 Sonnet |
+| `LANGSMITH_API_KEY` | (Optional) For detailed agent tracing |
+
+---
+
+## 🎮 Usage
+
+DECEPTICON offers two primary interfaces for mission control.
+
+### Option A: Tactical CLI (Terminal)
+Best for fast, low-latency operations and direct tool manipulation.
+```bash
+python frontend/cli/cli.py
+```
+
+### Option B: Command Web UI (Streamlit)
+A visual dashboard for monitoring swarm activity and reviewing detailed reports.
+```bash
+streamlit run frontend/streamlit_app.py
 ```
 
 ---
 
+## 📖 Mission Walkthrough
+
+A typical mission follows this autonomous lifecycle:
+
+1.  **Objective**: User provides a goal: *"Scan 192.168.1.0/24 for exposed databases."*
+2.  **Planning**: The **Planner Agent** breaks the goal into reconnaissance tasks.
+3.  **Execution**: The **Recon Agent** executes `nmap` via MCP and parses results.
+4.  **Analysis**: The **Researcher Agent** identifies service versions and cross-references CVEs.
+5.  **Reporting**: The **Summary Agent** generates a final tactical markdown report.
+
+---
+
+## 🧠 Agent Roles
+
+| Specialist | Mission Role | Key Capabilities |
+|---|---|---|
+| **Planner** | The Architect | Workflow orchestration & breakdown. |
+| **Recon** | The Scout | Port scanning, DNS, and service discovery. |
+| **Access** | The Breacher | Credential testing & exploit validation. |
+| **Researcher** | The Analyst | Zero-day research & CVE analysis. |
+| **Summary** | The Reporter | Intelligence compilation & report generation. |
+
+---
+
 ## 🛡️ Responsible Use & Legal
-**DECEPTICON** is a powerful security instrument. It must only be used against systems you own or have explicit authorization to test. Purple AI LAB does not condone illegal activities.
+
+**DECEPTICON** is a powerful security instrument. It must only be used against systems you own or have explicit authorization to test. **Purple AI LAB** and the developers do not condone illegal activities and are not responsible for misuse.
 
 ---
 
 <p align="center">
   <b>Unlocking the Future of AI-Driven Cyber Operations.</b><br>
-  Built with ⚡ by <b>Dhairy Chauhan</b>
+  Built with ⚡ by <a href="https://github.com/chauhand2463"><b>Dhairy Chauhan</b></a>
 </p>
