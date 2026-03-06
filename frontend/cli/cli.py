@@ -144,7 +144,15 @@ class DECEPTICONCLI:
 
     def display_banner(self):
 
-        banner_text =
+        banner_text = """
+      ::::::::  :::::::::: ::::::::  :::::::::: :::::::::  ::::::::::: ::::::::::: ::::::::   ::::::::  ::::    ::: 
+     :+:    :+: :+:       :+:    :+: :+:        :+:    :+:     :+:         :+:    :+:    :+: :+:    :+: :+:+:   :+: 
+     +:+    +:+ +:+       +:+        +:+        +:+    +:+     +:+         +:+    +:+    +:+ +:+    +:+ :+:+:+  +:+ 
+     +#+    +:+ +#++:++#  +#+        +#++:++#   +#++:++#+      +#+         +#+    +#+    +:+ +#+    +:+ +#+ +:+ +#+ 
+     +#+    +:+ +#+       +#+        +#+        +#+            +#+         +#+    +#+    +:+ +#+    +:+ +#+  +#+#+# 
+     #+#    #+# #+#       #+#    #+# #+#        #+#            #+#         #+#    #+#    #+# #+#    #+# #+#   #+#+# 
+      ########  ########## ########  ########## ###            ###     ########### ########   ########  ###    #### 
+        """
 
         banner_panel = Panel(
             Align.center(
@@ -743,7 +751,24 @@ class DECEPTICONCLI:
 
     def display_help(self):
 
-        help_content =
+        help_content = """
+[bold magenta]DECEPTICON - Vibe Hacking Agent[/bold magenta]
+
+[bold cyan]Core Commands:[/bold cyan]
+• [green]llm[/green]           - View current model & token configuration
+• [green]model-change[/green]  - Switch between cloud (OpenAI/Anthropic) or local (Ollama) models
+• [green]mcp-info[/green]      - List available MCP tools and servers
+• [green]memory-info[/green]   - Check persistence and session context status
+• [green]logs[/green]           - View conversation replay statistics
+• [green]clear[/green]          - Clear the terminal interface
+
+[bold cyan]Usage Tips:[/bold cyan]
+• You can talk to DECEPTICON in natural language.
+• Ask for security scans, code analysis, or system reconnaissance.
+• DECEPTICON uses an autonomous swarm architecture to handle complex tasks.
+
+[dim italic]Type 'quit' or 'exit' to terminate the session.[/dim italic]
+        """
 
         help_panel = Panel(
             help_content,
@@ -1071,13 +1096,8 @@ class DECEPTICONCLI:
 
             model_info = self.display_model_selection()
             if not model_info:
-                self.console.print(Panel(
-                    "[red]❌ No model selected[/red]\n\n"
-                    "[yellow]DECEPTICON requires an AI model to function.[/yellow]",
-                    box=box.ROUNDED,
-                    border_style="red",
-                    title="Startup Failed"
-                ))
+                # User chose to quit ('q') - exit gracefully
+                self.console.print("\n[bold cyan]👋 Goodbye![/bold cyan]")
                 return
 
             await self.setup_session(model_info)
@@ -1113,13 +1133,7 @@ async def main():
             title="Setup Error"
         ))
     except Exception as e:
-        console.print(Panel(
-            f"[bold red]❌ Startup Error[/bold red]\n\n"
-            f"[yellow]Error:[/yellow] {str(e)}",
-            box=box.ROUNDED,
-            border_style="red",
-            title="Startup Failed"
-        ))
+        console.print(f"\n[bold red]❌ Startup Error: {str(e)}[/bold red]")
 
 if __name__ == "__main__":
     try:

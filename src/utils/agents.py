@@ -83,8 +83,8 @@ class AgentManager:
         normalized = cls.normalize_agent_name(agent_name)
 
         if normalized:
-            return config["colors"]["frontend"].get(normalized, config["colors"]["frontend"].get("default", "
-        return config["colors"]["frontend"].get("default", "
+            return config["colors"]["frontend"].get(normalized, config["colors"]["frontend"].get("default", "blue"))
+        return config["colors"]["frontend"].get("default", "blue")
 
     @classmethod
     def get_avatar(cls, agent_name: str) -> str:

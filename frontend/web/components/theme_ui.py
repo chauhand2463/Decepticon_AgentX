@@ -44,92 +44,100 @@ class ThemeUIComponent:
 
         if theme == "dark":
             return {
-                "sidebar_bg": "
-                "sidebar_text": "
-                "toggle_bg": "
-                "toggle_text": "
+                "sidebar_bg": "#0B0B12",
+                "sidebar_text": "#FAFAFA",
+                "toggle_bg": "#262730",
+                "toggle_text": "#FAFAFA",
                 "toggle_border": "rgba(255, 255, 255, 0.2)",
-                "button_bg": "
-                "button_text": "
-                "button_border": "
-                "button_hover_bg": "
-                "button_hover_text": "
-                "button_active_bg": "
-                "button_active_text": "
-                "agent_bg": "linear-gradient(to right,
+                "button_bg": "#262730",
+                "button_text": "#FAFAFA",
+                "button_border": "#404040",
+                "button_hover_bg": "#404040",
+                "button_hover_text": "#FFFFFF",
+                "button_active_bg": "#FF4B4B",
+                "button_active_text": "#FFFFFF",
+                "agent_bg": "linear-gradient(to right, #222222, #2d2d2d, #222222)",
                 "agent_border": "transparent",
-                "agent_text": "
-                "agent_hover_bg": "linear-gradient(to right,
-                "active_bg": "linear-gradient(to right,
-                "active_border": "
+                "agent_text": "#f0f0f0",
+                "agent_hover_bg": "linear-gradient(to right, #262626, #323232, #262626)",
+                "active_bg": "linear-gradient(to right, #3a1515, #4a1f1f, #3a1515)",
+                "active_border": "#ff4b4b",
                 "active_shadow": "rgba(255, 75, 75, 0.9)",
                 "active_text_shadow": "rgba(255, 75, 75, 0.8)",
-                "completed_bg": "linear-gradient(to right,
-                "completed_border": "
-                "header_text": "
+                "completed_bg": "linear-gradient(to right, #152315, #1e3a1e, #152315)",
+                "completed_border": "#4CAF50",
+                "header_text": "#f0f0f0",
                 "header_border": "rgba(255, 255, 255, 0.1)",
                 "message_bg": "rgba(45, 45, 45, 0.5)",
-                "terminal_bg": "
-                "terminal_text": "
-                "terminal_header_bg": "
-                "terminal_header_text": "
-                "terminal_prompt": "
-                "terminal_command": "
-                "terminal_output": "
-                "terminal_cursor": "
+                "terminal_bg": "#1E1E1E",
+                "terminal_text": "#FFFFFF",
+                "terminal_header_bg": "#333333",
+                "terminal_header_text": "#FFFFFF",
+                "terminal_prompt": "#4EC9B0",
+                "terminal_command": "#DCDCAA",
+                "terminal_output": "#CCCCCC",
+                "terminal_cursor": "#FFFFFF",
                 "terminal_shadow": "rgba(0, 0, 0, 0.5)",
-                "chat_container_bg": "
-                "chat_input_bg": "
-                "chat_input_text": "
-                "chat_border": "
+                "chat_container_bg": "#0e1117",
+                "chat_input_bg": "#262730",
+                "chat_input_text": "#FAFAFA",
+                "chat_border": "#404040"
             }
         else:
             return {
-                "sidebar_bg": "
-                "sidebar_text": "
-                "toggle_bg": "
-                "toggle_text": "
+                "sidebar_bg": "#FFFFFF",
+                "sidebar_text": "#31333F",
+                "toggle_bg": "#F0F2F6",
+                "toggle_text": "#31333F",
                 "toggle_border": "rgba(49, 51, 63, 0.2)",
-                "button_bg": "
-                "button_text": "
-                "button_border": "
-                "button_hover_bg": "
-                "button_hover_text": "
-                "button_active_bg": "
-                "button_active_text": "
-                "agent_bg": "linear-gradient(to right,
-                "agent_border": "
-                "agent_text": "
-                "agent_hover_bg": "linear-gradient(to right,
-                "active_bg": "linear-gradient(to right,
-                "active_border": "
+                "button_bg": "#F0F2F6",
+                "button_text": "#31333F",
+                "button_border": "#DCDCDC",
+                "button_hover_bg": "#E0E0E0",
+                "button_hover_text": "#000000",
+                "button_active_bg": "#FF4B4B",
+                "button_active_text": "#FFFFFF",
+                "agent_bg": "linear-gradient(to right, #F8F9FA, #E9ECEF, #F8F9FA)",
+                "agent_border": "#DCDCDC",
+                "agent_text": "#31333F",
+                "agent_hover_bg": "linear-gradient(to right, #E9ECEF, #DEE2E6, #E9ECEF)",
+                "active_bg": "linear-gradient(to right, #FFF5F5, #FFE3E3, #FFF5F5)",
+                "active_border": "#FF4B4B",
                 "active_shadow": "rgba(255, 75, 75, 0.6)",
                 "active_text_shadow": "rgba(255, 75, 75, 0.4)",
-                "completed_bg": "linear-gradient(to right,
-                "completed_border": "
-                "header_text": "
+                "completed_bg": "linear-gradient(to right, #F6FFF6, #E6FFE6, #F6FFF6)",
+                "completed_border": "#4CAF50",
+                "header_text": "#31333F",
                 "header_border": "rgba(0, 0, 0, 0.1)",
                 "message_bg": "rgba(240, 242, 246, 0.5)",
-                "terminal_bg": "
-                "terminal_text": "
-                "terminal_header_bg": "
-                "terminal_header_text": "
-                "terminal_prompt": "
-                "terminal_command": "
-                "terminal_output": "
-                "terminal_cursor": "
+                "terminal_bg": "#F8F9FA",
+                "terminal_text": "#31333F",
+                "terminal_header_bg": "#E9ECEF",
+                "terminal_header_text": "#31333F",
+                "terminal_prompt": "#008080",
+                "terminal_command": "#000080",
+                "terminal_output": "#31333F",
+                "terminal_cursor": "#31333F",
                 "terminal_shadow": "rgba(0, 0, 0, 0.1)",
-                "chat_container_bg": "
-                "chat_input_bg": "
-                "chat_input_text": "
-                "chat_border": "
+                "chat_container_bg": "#FFFFFF",
+                "chat_input_bg": "#F0F2F6",
+                "chat_input_text": "#31333F",
+                "chat_border": "#DCDCDC"
             }
 
     def _generate_theme_overrides(self, colors: Dict[str, str], theme: str) -> str:
 
         animation_name = "pulse-button-dark" if theme == "dark" else "pulse-button-light"
 
-        return f
+        return f"""
+        <style>
+        @keyframes {animation_name} {{
+            0% {{ box-shadow: 0 0 0 0 {colors['active_shadow']}; }}
+            70% {{ box-shadow: 0 0 0 10px rgba(0, 0, 0, 0); }}
+            100% {{ box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }}
+        }}
+        </style>
+        """
 
     def _load_additional_css_files(self):
 
@@ -182,7 +190,7 @@ class ThemeUIComponent:
 
         colors = self._get_theme_colors(theme)
 
-        st.markdown(f, unsafe_allow_html=True)
+        st.markdown(f"### Theme Preview: {theme.capitalize()}", unsafe_allow_html=True)
 
     def apply_page_theme(self, theme: str = "dark"):
 

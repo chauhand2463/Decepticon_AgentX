@@ -40,7 +40,7 @@ class ModelSelectionComponent:
 
     def render_page_header(self):
 
-        st.markdown("
+        st.markdown("### DECEPTICON Tactical Interface")
         st.markdown("Choose the AI model for your red team operations")
 
     def render_current_model_info(self, current_model: Optional[Dict[str, Any]] = None):
@@ -189,7 +189,7 @@ class ModelSelectionComponent:
         col1, col2, col3 = st.columns([1, 2, 1])
 
         with col2:
-            st.markdown(f, unsafe_allow_html=True)
+            st.markdown(f"Initializing agents with {model_info.get('display_name', 'Model')}...", unsafe_allow_html=True)
 
             progress_bar = st.progress(0)
             for i in range(100):

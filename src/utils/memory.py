@@ -26,13 +26,8 @@ def get_store() -> InMemoryStore:
     global _store
 
     if _store is None:
-        _store = InMemoryStore(
-            index={
-                "dims": 1536,
-                "embed": "openai:text-embedding-3-small",
-            }
-        )
-        logger.info("InMemoryStore initialized with vector index")
+        _store = InMemoryStore()
+        logger.info("InMemoryStore initialized")
 
     return _store
 
