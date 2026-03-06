@@ -140,5 +140,5 @@ docker-compose up -d
 
 <p align="center">
   <b>Unlocking the Future of AI-Driven Cyber Operations.</b><br>
-  Built with ⚡ by <b>Purple AI LAB</b>
+  Built with ⚡ by <b>Dhairy Chauhan</b>
 </p>
