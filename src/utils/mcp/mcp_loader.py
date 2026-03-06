@@ -1,0 +1,47 @@
+import json
+import os
+from langchain_mcp_adapters.client import MultiServerMCPClient
+import asyncio
+
+async def load_mcp_tools(agent_name=None):
+
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    config_path = os.path.join(base_dir, "mcp_config.json")
+
+    try:
+        with open(config_path, "r") as f:
+            config = json.load(f)
+    except FileNotFoundError:
+        return []
+
+    if agent_name:
+        selected_agents = {agent: config[agent] for agent in agent_name if agent in config}
+    else:
+
+        selected_agents = {k: v for k, v in config.items() if k != "models" and isinstance(v, dict)}
+
+    tools = []
+
+    for agent_label, servers in selected_agents.items():
+        if not isinstance(servers, dict):
+            continue
+
+        for server_name, server_config in servers.items():
+            if not isinstance(server_config, dict):
+
+                continue
+
+            if "transport" not in server_config:
+                server_config["transport"] = "streamable_http" if "url" in server_config else "stdio"
+
+            client = MultiServerMCPClient({server_name: server_config})
+            try:
+                current_tools = await client.get_tools() if client else []
+            except Exception as e:
+                print(f"Warning: Failed to load tools from MCP server '{server_name}': {e}")
+                current_tools = []
+
+            if current_tools:
+                tools.extend(current_tools)
+
+    return tools if tools else []

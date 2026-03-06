@@ -1,0 +1,3 @@
+
+
+BASE_TERMINAL_PROMPT =
