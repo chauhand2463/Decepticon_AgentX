@@ -1,0 +1,31 @@
+services:
+
+  kali:
+    build:
+      context: .
+      dockerfile: Dockerfile.attacker
+    container_name: attacker
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./data:/root/data
+    ports:
+      - "3001:3001"
+    networks:
+      - pentest_network
+
+  metasploitable2:
+    image: tleemcjr/metasploitable2
+    container_name: victim
+    privileged: true
+    stdin_open: true
+    tty: true
+    command: /bin/bash -c "/bin/services.sh && bash"
+    ports:
+      - "3002:3002"
+    networks:
+      - pentest_network
+
+networks:
+  pentest_network:
+    driver: bridge

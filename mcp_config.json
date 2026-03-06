@@ -1,0 +1,94 @@
+{
+  "models": {
+    "claude_3_5_sonnet": {
+      "provider": "anthropic",
+      "model": "claude-3-5-sonnet",
+      "env_key": "ANTHROPIC_API_KEY"
+    },
+    "claude_sonnet_4": {
+      "provider": "anthropic",
+      "model": "claude-sonnet-4",
+      "env_key": "ANTHROPIC_API_KEY"
+    },
+    "claude_opus_4": {
+      "provider": "anthropic",
+      "model": "claude-opus-4",
+      "env_key": "ANTHROPIC_API_KEY"
+    },
+    "claude_sonnet_3_7": {
+      "provider": "anthropic",
+      "model": "claude-3-7-sonnet",
+      "env_key": "ANTHROPIC_API_KEY"
+    },
+    "claude_3_5_haiku": {
+      "provider": "anthropic",
+      "model": "claude-3-5-haiku",
+      "env_key": "ANTHROPIC_API_KEY"
+    },
+
+    "gpt_4o": {
+      "provider": "openai",
+      "model": "gpt-4o",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "gpt_4_1": {
+      "provider": "openai",
+      "model": "gpt-4.1",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "o4_mini": {
+      "provider": "openai",
+      "model": "o4-mini",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "o3_mini": {
+      "provider": "openai",
+      "model": "o3-mini",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "o1_mini": {
+      "provider": "openai",
+      "model": "o1-mini",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "gpt_4o_mini": {
+      "provider": "openai",
+      "model": "gpt-4o-mini",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "o3": {
+      "provider": "openai",
+      "model": "o3",
+      "env_key": "OPENAI_API_KEY"
+    },
+    "o1": {
+      "provider": "openai",
+      "model": "o1",
+      "env_key": "OPENAI_API_KEY"
+    }
+  },
+
+  "planner": {
+    "model": "claude_sonnet_3_7"
+  },
+
+  "summary": {
+    "model": "gpt_4o"
+  },
+
+  "reconnaissance": {
+    "model": "o3_mini",
+    "terminal": {
+      "url": "http://localhost:3001/mcp",
+      "transport": "streamable_http"
+    }
+  },
+
+  "initial_access": {
+    "model": "o3",
+    "terminal": {
+      "url": "http://localhost:3002/mcp",
+      "transport": "streamable_http"
+    }
+  }
+}
