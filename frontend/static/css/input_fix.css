@@ -1,0 +1,25 @@
+
+
+.stChatInput,
+div[data-testid="stChatInput"] {
+    position: fixed !important;
+    bottom: 20px !important;
+    left: calc(22% + 10px) !important;
+    width: 56% !important;
+    max-width: 56% !important;
+    z-index: 999 !important;
+    background-color: transparent !important;
+}
+
+section[data-testid="stSidebar"][aria-expanded="false"] ~ div div[data-testid="stChatInput"],
+section[data-testid="stSidebar"][aria-expanded="false"] ~ main div[data-testid="stChatInput"],
+[data-testid="stSidebarCollapsed"] ~ div div[data-testid="stChatInput"],
+[data-testid="collapsedControl"] ~ div div[data-testid="stChatInput"] {
+    left: 60px !important;
+    width: 64% !important;
+    max-width: 64% !important;
+}
+
+.chat-messages-container {
+    padding-bottom: 90px;
+}

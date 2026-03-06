@@ -1,0 +1,13 @@
+[theme]
+base = "dark"
+primaryColor = "
+backgroundColor = "
+secondaryBackgroundColor = "
+textColor = "
+linkColor = "
+font = "sans-serif"
+
+[theme.sidebar]
+backgroundColor = "
+secondaryBackgroundColor = "
+textColor = "

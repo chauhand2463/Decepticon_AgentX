@@ -1,0 +1,94 @@
+
+
+.agent-header {
+    font-size: 24px !important;
+    font-weight: 600;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    position: relative;
+}
+
+div.stChatMessage[data-testid="stChatMessage"]:has(.supervisor-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.planner-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.recon-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.initaccess-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.execution-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.persistence-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.privilege-escalation-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.defense-evasion-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.tool-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.tool-output-message),
+div.stChatMessage[data-testid="stChatMessage"]:has(.agent-message) {
+    margin-bottom: 25px;
+}
+
+.stChatInput {
+    position: fixed;
+    bottom: 30px;
+    width: calc(50% - 50px);
+    z-index: 999;
+    background-color: transparent !important;
+}
+
+div.stChatMessage[data-testid="stChatMessage"] .stChatMessageAvatar {
+    transform: scale(3);
+    margin-right: 8px;
+}
+
+div.stChatMessage[data-testid="stChatMessage"] div strong:not(:contains("You")) {
+    font-size: 30px !important;
+    font-weight: bold;
+}
+
+@keyframes pulse-button {
+    0% {
+        background-color: rgba(255, 75, 75, 0.15);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.7);
+    }
+    50% {
+        background-color: rgba(255, 75, 75, 0.3);
+        box-shadow: 0 0 10px 0 rgba(255, 75, 75, 0.7);
+    }
+    100% {
+        background-color: rgba(255, 75, 75, 0.15);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0);
+    }
+}
+
+@keyframes pulse-button-light {
+    0% {
+        background-color: rgba(255, 75, 75, 0.05);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.3);
+    }
+    50% {
+        background-color: rgba(255, 75, 75, 0.1);
+        box-shadow: 0 0 10px 0 rgba(255, 75, 75, 0.3);
+    }
+    100% {
+        background-color: rgba(255, 75, 75, 0.05);
+        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0);
+    }
+}
+
+.typing-container {
+    display: inline-block;
+    width: 100%;
+}
+
+.streaming-text {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+div.stChatMessage[data-testid="stChatMessage"] {
+    position: relative;
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+div.stChatMessage[data-testid="stChatMessage"] .stChatMessageAvatar {
+    transform: scale(1.5);
+    margin-right: 12px;
+    position: relative;
+    top: -5px;
+}
