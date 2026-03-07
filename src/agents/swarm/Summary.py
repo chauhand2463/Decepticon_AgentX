@@ -2,7 +2,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from src.prompts.prompt_loader import load_prompt
-from src.tools.handoff import handoff_to_initial_access, handoff_to_reconnaissance, handoff_to_planner
+from src.tools.handoff import handoff_to_initial_access, handoff_to_reconnaissance, handoff_to_planner, handoff_to_researcher
 from src.utils.llm.config_manager import get_current_llm
 from src.utils.memory import get_store
 
@@ -22,6 +22,7 @@ async def make_summary_agent():
 
     swarm_tools = [
         handoff_to_reconnaissance,
+        handoff_to_researcher,
         handoff_to_initial_access,
         handoff_to_planner,
     ]

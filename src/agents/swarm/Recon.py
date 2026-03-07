@@ -1,6 +1,6 @@
 from langgraph.prebuilt import create_react_agent
 from src.prompts.prompt_loader import load_prompt
-from src.tools.handoff import handoff_to_planner, handoff_to_initial_access, handoff_to_summary
+from src.tools.handoff import handoff_to_planner, handoff_to_initial_access, handoff_to_summary, handoff_to_researcher
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from src.utils.llm.config_manager import get_current_llm
@@ -21,6 +21,7 @@ async def make_recon_agent():
     mcp_tools = await load_mcp_tools(agent_name=["reconnaissance"])
     swarm_tools = [
         handoff_to_initial_access,
+        handoff_to_researcher,
         handoff_to_planner,
         handoff_to_summary,
     ]

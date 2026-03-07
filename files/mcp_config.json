@@ -1,0 +1,46 @@
+{
+  "planner_agent": {
+    "note": "Planner uses no MCP tools — it only reads state and outputs mission plans."
+  },
+
+  "recon_agent": {
+    "nmap": {
+      "transport": "stdio",
+      "command": "python",
+      "args": ["mcp_servers/nmap_server.py"],
+      "env": {}
+    }
+  },
+
+  "researcher_agent": {
+    "nuclei": {
+      "transport": "stdio",
+      "command": "python",
+      "args": ["mcp_servers/nuclei_server.py"],
+      "env": {}
+    }
+  },
+
+  "access_agent": {
+    "sqlmap": {
+      "transport": "stdio",
+      "command": "python",
+      "args": ["mcp_servers/sqlmap_server.py"],
+      "env": {}
+    },
+    "metasploit": {
+      "transport": "stdio",
+      "command": "python",
+      "args": ["mcp_servers/metasploit_server.py"],
+      "env": {
+        "MSF_HOST": "127.0.0.1",
+        "MSF_PORT": "55553",
+        "MSF_PASS": "decepticon_pass"
+      }
+    }
+  },
+
+  "summary_agent": {
+    "note": "Summary agent reads swarm state and generates reports — no external MCP tools needed."
+  }
+}

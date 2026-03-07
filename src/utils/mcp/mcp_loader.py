@@ -34,6 +34,21 @@ async def load_mcp_tools(agent_name=None):
             if "transport" not in server_config:
                 server_config["transport"] = "streamable_http" if "url" in server_config else "stdio"
 
+            # Resolve relative paths in args to absolute paths
+            if "args" in server_config:
+                new_args = []
+                for arg in server_config["args"]:
+                    if isinstance(arg, str) and not os.path.isabs(arg):
+                        # Check if the path exists relative to base_dir
+                        abs_path = os.path.abspath(os.path.join(base_dir, arg))
+                        if os.path.exists(abs_path):
+                            new_args.append(abs_path)
+                        else:
+                            new_args.append(arg)
+                    else:
+                        new_args.append(arg)
+                server_config["args"] = new_args
+
             client = MultiServerMCPClient({server_name: server_config})
             try:
                 current_tools = await client.get_tools() if client else []

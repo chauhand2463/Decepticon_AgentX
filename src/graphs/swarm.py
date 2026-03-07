@@ -2,6 +2,7 @@ from src.agents.swarm.Recon import make_recon_agent
 from src.agents.swarm.InitAccess import make_initaccess_agent
 from src.agents.swarm.Planner import make_planner_agent
 from src.agents.swarm.Summary import make_summary_agent
+from src.agents.swarm.Researcher import make_researcher_agent
 from src.utils.swarm.swarm import create_swarm
 from src.utils.memory import get_checkpointer, get_store
 import asyncio
@@ -18,7 +19,8 @@ async def create_agents():
     initaccess = await make_initaccess_agent()
     planner = await make_planner_agent()
     summary = await make_summary_agent()
-    return [recon, initaccess, planner, summary]
+    researcher = await make_researcher_agent()
+    return [recon, initaccess, planner, summary, researcher]
 
 async def create_dynamic_swarm():
 

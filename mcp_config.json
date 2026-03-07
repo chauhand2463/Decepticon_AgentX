@@ -1,94 +1,75 @@
 {
   "models": {
-    "claude_3_5_sonnet": {
-      "provider": "anthropic",
-      "model": "claude-3-5-sonnet",
-      "env_key": "ANTHROPIC_API_KEY"
-    },
-    "claude_sonnet_4": {
-      "provider": "anthropic",
-      "model": "claude-sonnet-4",
-      "env_key": "ANTHROPIC_API_KEY"
-    },
-    "claude_opus_4": {
-      "provider": "anthropic",
-      "model": "claude-opus-4",
-      "env_key": "ANTHROPIC_API_KEY"
-    },
     "claude_sonnet_3_7": {
       "provider": "anthropic",
-      "model": "claude-3-7-sonnet",
+      "model": "claude-3-7-sonnet-latest",
       "env_key": "ANTHROPIC_API_KEY"
     },
-    "claude_3_5_haiku": {
-      "provider": "anthropic",
-      "model": "claude-3-5-haiku",
-      "env_key": "ANTHROPIC_API_KEY"
+    "deepseek_v3": {
+      "provider": "openrouter",
+      "model": "deepseek/deepseek-chat",
+      "env_key": "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"
     },
-
+    "claude_3_5_sonnet_or": {
+      "provider": "openrouter",
+      "model": "anthropic/claude-3.5-sonnet",
+      "env_key": "OPENROUTER_API_KEY"
+    },
     "gpt_4o": {
       "provider": "openai",
       "model": "gpt-4o",
       "env_key": "OPENAI_API_KEY"
-    },
-    "gpt_4_1": {
-      "provider": "openai",
-      "model": "gpt-4.1",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "o4_mini": {
-      "provider": "openai",
-      "model": "o4-mini",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "o3_mini": {
-      "provider": "openai",
-      "model": "o3-mini",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "o1_mini": {
-      "provider": "openai",
-      "model": "o1-mini",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "gpt_4o_mini": {
-      "provider": "openai",
-      "model": "gpt-4o-mini",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "o3": {
-      "provider": "openai",
-      "model": "o3",
-      "env_key": "OPENAI_API_KEY"
-    },
-    "o1": {
-      "provider": "openai",
-      "model": "o1",
-      "env_key": "OPENAI_API_KEY"
     }
   },
-
   "planner": {
-    "model": "claude_sonnet_3_7"
+    "model": "deepseek_v3"
   },
-
   "summary": {
-    "model": "gpt_4o"
+    "model": "deepseek_v3"
   },
-
   "reconnaissance": {
-    "model": "o3_mini",
-    "terminal": {
-      "url": "http://localhost:3001/mcp",
-      "transport": "streamable_http"
+    "model": "deepseek_v3",
+    "nmap": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/nmap_server.py"
+      ],
+      "env": {}
     }
   },
-
   "initial_access": {
-    "model": "o3",
-    "terminal": {
-      "url": "http://localhost:3002/mcp",
-      "transport": "streamable_http"
+    "model": "deepseek_v3",
+    "sqlmap": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/sqlmap_server.py"
+      ],
+      "env": {}
+    },
+    "metasploit": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/metasploit_server.py"
+      ],
+      "env": {
+        "MSF_HOST": "127.0.0.1",
+        "MSF_PORT": "55553",
+        "MSF_PASS": "decepticon_pass"
+      }
+    }
+  },
+  "researcher": {
+    "model": "deepseek_v3",
+    "nuclei": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/nuclei_server.py"
+      ],
+      "env": {}
     }
   }
 }
