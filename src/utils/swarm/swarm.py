@@ -47,8 +47,7 @@ def add_active_agent_router(
     default_active_agent: str,
 ) -> StateGraph:
 
-    channels = builder.schemas[builder.schema]
-    if "active_agent" not in channels:
+    if "active_agent" not in builder.channels:
         raise ValueError("Missing required key 'active_agent' in in builder's state_schema")
 
     if default_active_agent not in route_to:

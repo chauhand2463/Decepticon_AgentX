@@ -61,7 +61,8 @@ PROVIDERS = [
     "DeepSeek",
     "Gemini",
     "Groq",
-    "Ollama"
+    "Ollama",
+    "OpenRouter"
 ]
 
 TERMINAL_PREFIXES_TO_REMOVE = [
@@ -69,8 +70,7 @@ TERMINAL_PREFIXES_TO_REMOVE = [
     'Executing:',
     'Command:',
     'Execute:',
-    '$',
-    '
+    '$'
 ]
 
 TERMINAL_TOOL_KEYWORDS = [
