@@ -8,7 +8,7 @@
     "deepseek_v3": {
       "provider": "openrouter",
       "model": "deepseek/deepseek-chat",
-      "env_key": "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"
+      "env_key": "OPENROUTER_API_KEY"
     },
     "claude_3_5_sonnet_or": {
       "provider": "openrouter",
