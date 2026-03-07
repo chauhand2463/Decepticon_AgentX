@@ -25,7 +25,6 @@
 Unlike manual reconnaissance tools, **DECEPTICON** functions as a high-level supervisor, delegating complex technical chains to a dynamic agent mesh that self-corrects and adapts to target defenses in real-time.
 
 <p align="center">
-  <img src="assets/main.png" alt="DECEPTICON Dashboard" width="900">
   <br>
   <i>The DECEPTICON Autonomous Command Center</i>
 </p>
