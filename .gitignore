@@ -1,28 +1,40 @@
+# Virtual Environments
 .venv/
-.langgraph_api/
+env/
+venv/
+ENV/
+
+# Secrets and API Keys
 .env
+.env.*
+*.key
+*.pem
+secrets.json
+credentials.json
+api_keys.json
+keys.txt
+.secrets
 load_env.bat
+
+# Logs and Data
 logs/
 data/
-tests/
 backup/
+*.log
 
-ex_version/
+# Project Specific
+.langgraph_api/
+tests/
 ex_version/
 .cursor/
 .vscode/
 *.egg-info/
+cliv3.py
+frontend/MIGRATION_GUIDE.md
+frontend/REFACTORING_COMPLETE.md
 
 # Python byte-compiled files
 __pycache__/
 *.py[cod]
 *$py.class
 .python-version
-
-cliv3.py
-frontend/MIGRATION_GUIDE.md
-frontend/REFACTORING_COMPLETE.md
-
-# Environments
-.env
-.venv
