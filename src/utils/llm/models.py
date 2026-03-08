@@ -14,6 +14,8 @@ class ModelProvider(str, Enum):
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
     OPENROUTER = "openrouter"
+    GROQ = "groq"
+    GOOGLE = "google"
 
 @dataclass
 class ModelInfo:
@@ -110,6 +112,8 @@ def validate_api_key(provider: ModelProvider) -> bool:
         ModelProvider.OPENAI: "OPENAI_API_KEY",
         ModelProvider.ANTHROPIC: "ANTHROPIC_API_KEY",
         ModelProvider.OPENROUTER: "OPENROUTER_API_KEY",
+        ModelProvider.GROQ: "GROQ_API_KEY",
+        ModelProvider.GOOGLE: "GOOGLE_API_KEY",
     }
 
     if provider == ModelProvider.OLLAMA:
@@ -202,6 +206,20 @@ def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
         from .openrouter import create_openrouter_model
         return create_openrouter_model(
             model_name=model_name,
+            temperature=temperature
+        )
+
+    elif provider_enum == ModelProvider.GROQ:
+        from langchain_groq import ChatGroq
+        return ChatGroq(
+            model=model_name,
+            temperature=temperature
+        )
+
+    elif provider_enum == ModelProvider.GOOGLE:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        return ChatGoogleGenerativeAI(
+            model=model_name,
             temperature=temperature
         )
 

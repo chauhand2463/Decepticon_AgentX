@@ -19,13 +19,33 @@
       "provider": "openai",
       "model": "gpt-4o",
       "env_key": "OPENAI_API_KEY"
+    },
+    "llama_3_3_groq": {
+      "provider": "groq",
+      "model": "llama-3.3-70b-versatile",
+      "env_key": "GROQ_API_KEY"
+    },
+    "gemini_1_5_pro": {
+      "provider": "google",
+      "model": "gemini-1.5-pro",
+      "env_key": "GOOGLE_API_KEY"
+    },
+    "gemini_2_0_flash": {
+      "provider": "google",
+      "model": "gemini-2.0-flash",
+      "env_key": "GOOGLE_API_KEY"
+    },
+    "deepseek_r1": {
+      "provider": "openrouter",
+      "model": "deepseek/deepseek-reasoner",
+      "env_key": "OPENROUTER_API_KEY"
     }
   },
   "planner": {
-    "model": "deepseek_v3"
+    "model": "claude_sonnet_3_7"
   },
   "summary": {
-    "model": "deepseek_v3"
+    "model": "gemini_2_0_flash"
   },
   "reconnaissance": {
     "model": "deepseek_v3",
@@ -39,7 +59,7 @@
     }
   },
   "initial_access": {
-    "model": "deepseek_v3",
+    "model": "deepseek_r1",
     "sqlmap": {
       "transport": "stdio",
       "command": "python",
@@ -62,7 +82,7 @@
     }
   },
   "researcher": {
-    "model": "deepseek_v3",
+    "model": "gemini_2_0_flash",
     "nuclei": {
       "transport": "stdio",
       "command": "python",

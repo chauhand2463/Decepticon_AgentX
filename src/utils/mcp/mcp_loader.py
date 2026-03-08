@@ -39,11 +39,12 @@ async def load_mcp_tools(agent_name=None):
                 new_args = []
                 for arg in server_config["args"]:
                     if isinstance(arg, str) and not os.path.isabs(arg):
-                        # Check if the path exists relative to base_dir
-                        abs_path = os.path.abspath(os.path.join(base_dir, arg))
+                        # Try to resolve relative to base_dir
+                        abs_path = os.path.normpath(os.path.join(base_dir, arg))
                         if os.path.exists(abs_path):
                             new_args.append(abs_path)
                         else:
+                            # Fallback to the original arg if file not found locally
                             new_args.append(arg)
                     else:
                         new_args.append(arg)
@@ -51,9 +52,13 @@ async def load_mcp_tools(agent_name=None):
 
             client = MultiServerMCPClient({server_name: server_config})
             try:
+                # Add a small timeout or error handling for server initialization
                 current_tools = await client.get_tools() if client else []
             except Exception as e:
                 print(f"Warning: Failed to load tools from MCP server '{server_name}': {e}")
+                # Log more detail if possible
+                if "No such file or directory" in str(e):
+                    print(f"  Check if the server script exists: {server_config.get('args', [])}")
                 current_tools = []
 
             if current_tools:

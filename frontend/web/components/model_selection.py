@@ -19,7 +19,9 @@ class ModelSelectionComponent:
             "DeepSeek": {"name": "DeepSeek"},
             "Gemini": {"name": "Gemini"},
             "Groq": {"name": "Groq"},
-            "Ollama": {"name": "Ollama"}
+            "Ollama": {"name": "Ollama"},
+            "Google": {"name": "Google"},
+            "OpenRouter": {"name": "OpenRouter"}
         }
         return provider_info.get(provider, {"name": provider})
 
