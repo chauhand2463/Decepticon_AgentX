@@ -15,6 +15,11 @@ from src.prompts.personas.initial_access_persona import INITIAL_ACCESS_PERSONA_P
 from src.prompts.personas.planner_persona import PLANNER_PERSONA_PROMPT
 from src.prompts.personas.summary_persona import SUMMARY_PERSONA_PROMPT
 from src.prompts.personas.supervisor_persona import SUPERVISOR_PERSONA_PROMPT
+from src.prompts.personas.bounty_persona import BOUNTY_PERSONA_PROMPT
+from src.prompts.personas.scout_persona import SCOUT_PERSONA_PROMPT
+from src.prompts.personas.triage_persona import TRIAGE_PERSONA_PROMPT
+from src.prompts.personas.guardian_persona import GUARDIAN_PERSONA_PROMPT
+from src.prompts.personas.analyst_persona import ANALYST_PERSONA_PROMPT
 
 from src.prompts.swarm.summary import SWARM_SUMMARY_PROMPT
 from src.prompts.swarm.planner import SWARM_PLANNER_PROMPT
@@ -30,7 +35,12 @@ PERSONA_PROMPTS = {
     "planner": PLANNER_SYSTEM_PROMPT,
     "summary": SUMMARY_SYSTEM_PROMPT,
     "supervisor": SUPERVISOR_PERSONA_PROMPT,
-    "researcher": RESEARCHER_SYSTEM_PROMPT
+    "researcher": RESEARCHER_SYSTEM_PROMPT,
+    "bounty": BOUNTY_PERSONA_PROMPT,
+    "scout": SCOUT_PERSONA_PROMPT,
+    "triage": TRIAGE_PERSONA_PROMPT,
+    "guardian": GUARDIAN_PERSONA_PROMPT,
+    "analyst": ANALYST_PERSONA_PROMPT
 }
 
 SWARM_PROMPTS = {

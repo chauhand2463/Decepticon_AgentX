@@ -18,11 +18,10 @@ def create_openrouter_model(model_name: str, temperature: float = 0.0):
         base_url="https://openrouter.ai/api/v1",
         temperature=0,
         max_tokens=4000,
-        model_kwargs={
-            "extra_headers": {
-                "HTTP-Referer": "https://decepticon.cyber",
-                "X-Title": "Decepticon",
-            }
+        default_headers={
+            "HTTP-Referer": "https://decepticon.cyber",
+            "X-Title": "Decepticon",
+            "Authorization": f"Bearer {api_key}"
         }
     )
 

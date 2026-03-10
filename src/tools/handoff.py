@@ -5,3 +5,8 @@ handoff_to_planner = create_handoff_tool(agent_name="Planner", name="transfer_to
 handoff_to_summary = create_handoff_tool(agent_name="Summary", name="transfer_to_summary", description="Transfer to Summary")
 handoff_to_initial_access = create_handoff_tool(agent_name="Initial_Access", name="transfer_to_initial_access", description="Transfer to Initial_Access")
 handoff_to_researcher = create_handoff_tool(agent_name="Researcher", name="transfer_to_researcher", description="Transfer to Researcher (vulnerability analysis)")
+handoff_to_bounty = create_handoff_tool(agent_name="Bounty", name="transfer_to_bounty", description="Transfer to Bounty (Bug Bounty Coordinator)")
+handoff_to_scout = create_handoff_tool(agent_name="Scout", name="transfer_to_scout", description="Transfer to Scout (Recon Specialist)")
+handoff_to_triage = create_handoff_tool(agent_name="Triage", name="transfer_to_triage", description="Transfer to Triage (Quality Control)")
+handoff_to_guardian = create_handoff_tool(agent_name="Guardian", name="transfer_to_guardian", description="Transfer to Guardian (Scope Validator)")
+handoff_to_analyst = create_handoff_tool(agent_name="Analyst", name="transfer_to_analyst", description="Transfer to Analyst (ROI Tracker)")

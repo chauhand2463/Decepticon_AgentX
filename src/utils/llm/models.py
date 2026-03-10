@@ -106,7 +106,11 @@ def get_ollama_models_with_mappings() -> List[ModelInfo]:
 
     return []
 
+_api_key_status_cache = {}
+
 def validate_api_key(provider: ModelProvider) -> bool:
+    if provider in _api_key_status_cache:
+        return _api_key_status_cache[provider]
 
     key_map = {
         ModelProvider.OPENAI: "OPENAI_API_KEY",
@@ -120,12 +124,38 @@ def validate_api_key(provider: ModelProvider) -> bool:
 
         try:
             response = requests.get("http://localhost:11434/api/tags", timeout=3)
-            return response.status_code == 200
+            status = (response.status_code == 200)
+            _api_key_status_cache[provider] = status
+            return status
         except requests.RequestException:
+            _api_key_status_cache[provider] = False
             return False
 
     required_key = key_map.get(provider)
-    return bool(os.getenv(required_key)) if required_key else False
+    key = os.getenv(required_key) if required_key else None
+    
+    if not key:
+        _api_key_status_cache[provider] = False
+        return False
+        
+    try:
+        if provider == ModelProvider.OPENROUTER:
+            res = requests.get("https://openrouter.ai/api/v1/auth/key", headers={"Authorization": f"Bearer {key}"}, timeout=3)
+            status = (res.status_code == 200)
+            _api_key_status_cache[provider] = status
+            return status
+            
+        elif provider == ModelProvider.ANTHROPIC:
+            res = requests.get("https://api.anthropic.com/v1/models", headers={"x-api-key": key, "anthropic-version": "2023-06-01"}, timeout=3)
+            status = (res.status_code == 200)
+            _api_key_status_cache[provider] = status
+            return status
+            
+    except requests.RequestException:
+        pass
+
+    _api_key_status_cache[provider] = True
+    return True
 
 def check_ollama_connection() -> Dict[str, Any]:
 
