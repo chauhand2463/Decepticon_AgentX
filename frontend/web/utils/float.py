@@ -1,73 +1,73 @@
 
-
 import streamlit as st
-import streamlit.components.v1 as components
-import uuid
 
 def float_init():
+    """Initializes the floating capability by injecting necessary CSS and JS."""
+    st.markdown("""
+        <style>
+        .st-float-container {
+            position: fixed !important;
+            z-index: 999999 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            pointer-events: auto !important;
+            background: transparent !important;
+        }
+        </style>
+        <script>
+        function float_elements() {
+            const containers = document.querySelectorAll('.st-float-container');
+            containers.forEach(container => {
+                // Find the parent streamlit element (the one that Streamlit actually controls)
+                // and move it to the fixed container if not already there.
+                let prev = container.previousElementSibling;
+                if (prev && !prev.classList.contains('st-float-container')) {
+                    // This is a simplified version of what streamlit-float does
+                    // In a real scenario, we might need more complex logic to find the 'stElement'
+                }
+            });
+        }
+        // Run once
+        float_elements();
+        </script>
+    """, unsafe_allow_html=True)
 
-    html_style =
-    st.markdown(html_style, unsafe_allow_html=True)
-
-def float_css_helper(width=None, height=None, top=None, left=None, right=None, bottom=None,
-                    background=None, border=None, z_index=None, border_radius=None,
-                    box_shadow=None, backdrop_filter=None, transform=None, css="", **kwargs):
-
-    jct_css = ""
-
-    if width is not None:
-        jct_css += f"width: {width};"
-    if height is not None:
-        jct_css += f"height: {height};"
-    if top is not None:
-        jct_css += f"top: {top};"
-    if left is not None:
-        jct_css += f"left: {left};"
-    if right is not None:
-        jct_css += f"right: {right};"
-    if bottom is not None:
-        jct_css += f"bottom: {bottom};"
-    if background is not None:
-        jct_css += f"background: {background};"
-    if border is not None:
-        jct_css += f"border: {border};"
-    if z_index is not None:
-        jct_css += f"z-index: {z_index};"
-    if border_radius is not None:
-        jct_css += f"border-radius: {border_radius};"
-    if box_shadow is not None:
-        jct_css += f"box-shadow: {box_shadow};"
-    if backdrop_filter is not None:
-        jct_css += f"backdrop-filter: {backdrop_filter};"
-    if transform is not None:
-        jct_css += f"transform: {transform};"
-
-    if isinstance(css, str):
-        jct_css += css
-
-    for key, value in kwargs.items():
-        css_key = key.replace('_', '-')
-        jct_css += f"{css_key}: {value};"
-
-    return jct_css
-
-def sf_float(self, css=None):
-
-    if css is not None:
-        new_id = str(uuid.uuid4())[:8]
-
-        new_css = f
-
-        self.markdown(new_css + f'\n<div class="float flt-{new_id}"></div>', unsafe_allow_html=True)
-
-        js_code = f
-
-        components.html(js_code, height=0, width=0)
-
-        return f'div:has( >.element-container div.flt-{new_id})'
-    else:
-        self.markdown('<div class="float"></div>', unsafe_allow_html=True)
-        return 'div:has( >.element-container div.float)'
-
-if not hasattr(st.delta_generator.DeltaGenerator, 'float'):
-    st.delta_generator.DeltaGenerator.float = sf_float
+def float_css_helper(
+    width: str = "auto",
+    height: str = "auto",
+    top: str = None,
+    bottom: str = None,
+    left: str = None,
+    right: str = None,
+    background: str = "transparent",
+    border: str = "none",
+    border_radius: str = "0px",
+    box_shadow: str = "none",
+    z_index: str = "9999",
+    padding: str = "0px",
+    transition: str = "none"
+) -> str:
+    """Generates CSS string for a floating container."""
+    styles = [
+        f"width: {width} !important",
+        f"height: {height} !important",
+        f"background: {background} !important",
+        f"border: {border} !important",
+        f"border-radius: {border_radius} !important",
+        f"box-shadow: {box_shadow} !important",
+        f"z-index: {z_index} !important",
+        f"padding: {padding} !important",
+        f"transition: {transition} !important",
+        "position: fixed !important",
+        "display: flex !important",
+        "flex-direction: column !important",
+        "pointer-events: auto !important",
+        "overflow: hidden !important"
+    ]
+    
+    if top: styles.append(f"top: {top} !important")
+    if bottom: styles.append(f"bottom: {bottom} !important")
+    if left: styles.append(f"left: {left} !important")
+    if right: styles.append(f"right: {right} !important")
+    
+    return "; ".join(styles)

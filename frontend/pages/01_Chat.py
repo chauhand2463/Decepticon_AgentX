@@ -14,6 +14,7 @@ from frontend.web.components.chat_messages import ChatMessagesComponent
 from frontend.web.components.terminal_ui import TerminalUIComponent
 from frontend.web.components.sidebar import SidebarComponent
 from frontend.web.components.theme_ui import ThemeUIComponent
+from frontend.web.components.mission_hud import MissionHUDComponent
 
 from frontend.web.core.app_state import get_app_state_manager
 from frontend.web.core.executor_manager import get_executor_manager
@@ -34,6 +35,7 @@ theme_ui = ThemeUIComponent()
 chat_messages = ChatMessagesComponent()
 terminal_ui = TerminalUIComponent()
 sidebar = SidebarComponent()
+mission_hud = MissionHUDComponent()
 
 def main():
 
@@ -57,6 +59,9 @@ def main():
     st.logo(ICON_TEXT, icon_image=ICON, size="large", link=COMPANY_LINK)
 
     st.title(":red[DECEPTICON]")
+
+    # Render Mission HUD
+    _render_mission_hud()
 
     _setup_sidebar()
 
@@ -105,6 +110,38 @@ def _setup_sidebar():
         debug_info=debug_info,
         callbacks=callbacks
     )
+
+def _render_mission_hud():
+    """
+    Renders the interactive Mission HUD at the top.
+    """
+    # Define the mission sequence matching the MITRE-inspired swarm HUD
+    agents_sequence = [
+        "Planner", 
+        "Reconnaissance", 
+        "Initial_Access", 
+        "Execution", 
+        "Persistence", 
+        "Privilege_Escalation", 
+        "Defense_Evasion", 
+        "Summary"
+    ]
+    active_agent = st.session_state.get('active_agent')
+    completed_agents = st.session_state.get('completed_agents', [])
+    hud_states = []
+    
+    for name in agents_sequence:
+        status = "waiting"
+        if name == active_agent:
+            status = "active"
+        elif name in completed_agents:
+            status = "completed"
+        
+        hud_states.append({"name": name, "status": status})
+    
+    st.markdown('<div class="hud-wrapper">', unsafe_allow_html=True)
+    mission_hud.render(hud_states)
+    st.markdown('</div>', unsafe_allow_html=True)
 
 def _display_main_interface():
 
@@ -180,7 +217,8 @@ def _handle_user_input(messages_area):
                 if result["error_message"]:
                     st.error(result["error_message"])
 
-        asyncio.run(execute_workflow())
+        from src.utils.async_runner import run_async
+        run_async(execute_workflow())
 
 def _display_message_callback(message, messages_area):
 
@@ -205,7 +243,8 @@ def _create_new_chat():
         if current_model:
             async def reinitialize():
                 await executor_manager.initialize_with_model(current_model)
-            asyncio.run(reinitialize())
+            from src.utils.async_runner import run_async
+            run_async(reinitialize())
 
         terminal_processor.clear_terminal_state()
 

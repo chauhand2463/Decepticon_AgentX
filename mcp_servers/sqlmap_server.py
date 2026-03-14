@@ -8,14 +8,10 @@ Run:     python mcp_servers/sqlmap_server.py
 
 import asyncio
 import json
-import subprocess
-import shlex
-import os
-import re
-from datetime import datetime
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types
+from docker_utils import run_in_container
 
 app = Server("decepticon-sqlmap")
 
@@ -27,55 +23,9 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # HELPERS
 # ─────────────────────────────────────────────
 
-def get_sqlmap_command() -> str:
-    """Find the correct sqlmap command (direct or via python script)."""
-    # 1. Try direct command
-    try:
-        subprocess.run(["sqlmap", "--version"], capture_output=True, timeout=2)
-        return "sqlmap"
-    except (subprocess.SubprocessError, FileNotFoundError, OSError):
-        pass
-
-    # 2. Try to find sqlmap.py in site-packages
-    try:
-        import sqlmap
-        import os
-        import sys
-        base_dir = os.path.dirname(sqlmap.__file__)
-        py_path = os.path.join(base_dir, "sqlmap.py")
-        if os.path.exists(py_path):
-            return f'"{sys.executable}" "{py_path}"'
-    except ImportError:
-        pass
-
-    return "sqlmap"  # Fallback
-
-
 def run_command(cmd: str, timeout: int = 600) -> dict:
-    try:
-        # Resolve sqlmap command if it starts with 'sqlmap'
-        if cmd.startswith("sqlmap"):
-            sqlmap_base = get_sqlmap_command()
-            cmd = cmd.replace("sqlmap", sqlmap_base, 1)
-
-        result = subprocess.run(
-            shlex.split(cmd),
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
-        return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "returncode": result.returncode,
-            "success": result.returncode == 0
-        }
-    except subprocess.TimeoutExpired:
-        return {"stdout": "", "stderr": f"Timed out after {timeout}s", "returncode": -1, "success": False}
-    except FileNotFoundError:
-        return {"stdout": "", "stderr": "sqlmap not found. Install: pip install sqlmap", "returncode": -1, "success": False}
-    except Exception as e:
-        return {"stdout": "", "stderr": str(e), "returncode": -1, "success": False}
+    """Run a shell command inside the attacker container."""
+    return run_in_container(cmd, timeout)
 
 
 def parse_sqlmap_output(output: str) -> dict:

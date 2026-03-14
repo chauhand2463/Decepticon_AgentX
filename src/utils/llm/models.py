@@ -225,12 +225,20 @@ def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
             max_tokens=4000,
         )
 
+
+
     elif provider_enum == ModelProvider.OLLAMA:
         from langchain_ollama import ChatOllama
-        return ChatOllama(
+        from .ollama_wrapper import OllamaToolWrapper
+        # Robust Ollama initialization
+        llm = ChatOllama(
             model=model_name,
-            temperature=0
+            temperature=0,
+            num_ctx=8192,
         )
+        return OllamaToolWrapper(llm)
+
+
 
     elif provider_enum == ModelProvider.OPENROUTER:
         from .openrouter import create_openrouter_model

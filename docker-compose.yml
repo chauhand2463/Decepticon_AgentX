@@ -11,6 +11,8 @@ services:
       - ./data:/root/data
     networks:
       - pentest_network
+    ports:
+      - "55553:55553"
 
 networks:
   pentest_network:

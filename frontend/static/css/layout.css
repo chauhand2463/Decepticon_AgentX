@@ -1,47 +1,45 @@
 
+/* 
+ * DECEPTICON - LAYOUT UTILITIES
+ */
 
-div[data-testid="column"]:first-child {
-    width: 20% !important;
-    max-width: 20% !important;
-    padding-right: 10px;
-}
-div[data-testid="column"]:nth-child(2) {
-    width: 60% !important;
-    max-width: 60% !important;
-}
-div[data-testid="column"]:nth-child(3) {
-    width: 20% !important;
-    max-width: 20% !important;
+/* Force Wide Layout Centering */
+.block-container {
+    padding-top: 3rem !important;
+    padding-bottom: 10rem !important;
+    max-width: 1200px !important;
 }
 
-div.stChatMessageContent {
-    max-width: 95%;
+/* Mission HUD Positioning */
+.hud-wrapper {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 999999;
+    pointer-events: none;
 }
 
-@media (max-width: 992px) {
-    div[data-testid="column"]:first-child {
-        width: 20% !important;
-        max-width: 20% !important;
-    }
-    div[data-testid="column"]:nth-child(2) {
-        width: 60% !important;
-        max-width: 60% !important;
-    }
-    div[data-testid="column"]:nth-child(3) {
-        width: 20% !important;
-        max-width: 20% !important;
-    }
+.hud-wrapper > * {
+    pointer-events: auto;
 }
 
-@media (max-width: 768px) {
-    div[data-testid="column"]:first-child,
-    div[data-testid="column"]:nth-child(2),
-    div[data-testid="column"]:nth-child(3) {
-        width: 100% !important;
-        max-width: 100% !important;
-    }
+/* Hide Streamlit Default Elements for a cleaner HUD app */
+header[data-testid="stHeader"] {
+    background-color: transparent !important;
+    backdrop-filter: blur(5px);
 }
 
-.main .block-container {
-    padding-bottom: 100px;
+footer {
+    visibility: hidden;
+}
+
+#MainMenu {
+    visibility: hidden;
+}
+
+/* Chat Bubbles Depth */
+.stChatMessage:hover {
+    border-color: rgba(148, 163, 184, 0.3) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }

@@ -6,7 +6,11 @@ from src.prompts.elite_prompts import (
     RECON_SYSTEM_PROMPT,
     RESEARCHER_SYSTEM_PROMPT,
     ACCESS_SYSTEM_PROMPT,
-    SUMMARY_SYSTEM_PROMPT
+    SUMMARY_SYSTEM_PROMPT,
+    EXECUTION_SYSTEM_PROMPT,
+    PERSISTENCE_SYSTEM_PROMPT,
+    PRIVILEGE_ESCALATION_SYSTEM_PROMPT,
+    DEFENSE_EVASION_SYSTEM_PROMPT
 )
 
 # Keep old imports for reference or if needed for other architectures
@@ -40,7 +44,11 @@ PERSONA_PROMPTS = {
     "scout": SCOUT_PERSONA_PROMPT,
     "triage": TRIAGE_PERSONA_PROMPT,
     "guardian": GUARDIAN_PERSONA_PROMPT,
-    "analyst": ANALYST_PERSONA_PROMPT
+    "analyst": ANALYST_PERSONA_PROMPT,
+    "execution": EXECUTION_SYSTEM_PROMPT,
+    "persistence": PERSISTENCE_SYSTEM_PROMPT,
+    "privilege_escalation": PRIVILEGE_ESCALATION_SYSTEM_PROMPT,
+    "defense_evasion": DEFENSE_EVASION_SYSTEM_PROMPT
 }
 
 SWARM_PROMPTS = {
@@ -49,6 +57,10 @@ SWARM_PROMPTS = {
     "planner": SWARM_PLANNER_PROMPT,
     "summary": SWARM_SUMMARY_PROMPT,
     "researcher": SWARM_RESEARCHER_PROMPT,
+    "execution": "SWARM DIRECTIVE: Execute confirmed exploits. Capture proof of access.",
+    "persistence": "SWARM DIRECTIVE: Maintain access across reboots/sessions. Document cleanup commands.",
+    "privilege_escalation": "SWARM DIRECTIVE: Focus on vertical movement (Root/System). Verify escalation path.",
+    "defense_evasion": "SWARM DIRECTIVE: Simulate stealth techniques and bypass methods.",
     "supervisor": ""
 }
 

@@ -8,17 +8,14 @@ Run:     python mcp_servers/nmap_server.py
 
 import asyncio
 import json
-import subprocess
-import shlex
-import re
-import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types
+from docker_utils import run_in_container
 
-app = Server("decepticon-nmap")
+app = Server("decepticon-recon")
 
 
 # ─────────────────────────────────────────────
@@ -26,26 +23,8 @@ app = Server("decepticon-nmap")
 # ─────────────────────────────────────────────
 
 def run_command(cmd: str, timeout: int = 300) -> dict:
-    """Run a shell command and return stdout, stderr, returncode."""
-    try:
-        result = subprocess.run(
-            shlex.split(cmd),
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
-        return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "returncode": result.returncode,
-            "success": result.returncode == 0
-        }
-    except subprocess.TimeoutExpired:
-        return {"stdout": "", "stderr": f"Command timed out after {timeout}s", "returncode": -1, "success": False}
-    except FileNotFoundError:
-        return {"stdout": "", "stderr": "nmap not found. Install with: apt install nmap", "returncode": -1, "success": False}
-    except Exception as e:
-        return {"stdout": "", "stderr": str(e), "returncode": -1, "success": False}
+    """Run a shell command inside the attacker container."""
+    return run_in_container(cmd, timeout)
 
 
 def parse_nmap_xml(xml_output: str) -> dict:
@@ -226,6 +205,57 @@ async def list_tools() -> list[types.Tool]:
                 },
                 "required": ["command"]
             }
+        ),
+        types.Tool(
+            name="subfinder",
+            description="Passive subdomain discovery using various OSINT sources.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "domain": {"type": "string", "description": "Target domain (e.g. example.com)"},
+                    "timeout": {"type": "integer", "default": 180}
+                },
+                "required": ["domain"]
+            }
+        ),
+        types.Tool(
+            name="httpx",
+            description="Fast and multi-purpose HTTP toolkit for probing technologies and status codes.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "target": {"type": "string", "description": "Target URL or domain"},
+                    "options": {"type": "string", "description": "Additional httpx flags (e.g. -status-code -title)", "default": "-status-code -title -tech-detect"},
+                    "timeout": {"type": "integer", "default": 120}
+                },
+                "required": ["target"]
+            }
+        ),
+        types.Tool(
+            name="ffuf",
+            description="Fast web fuzzer for directory and file discovery.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "description": "Target URL with FUZZ keyword (e.g. http://target.com/FUZZ)"},
+                    "wordlist": {"type": "string", "description": "Wordlist path", "default": "/usr/share/wordlists/dirb/common.txt"},
+                    "timeout": {"type": "integer", "default": 300}
+                },
+                "required": ["url"]
+            }
+        ),
+        types.Tool(
+            name="gobuster",
+            description="URI/File/DNS brute forcing tool.",
+            inputSchema={
+                "type": "object",
+                "properties": {
+                    "url": {"type": "string", "description": "Target URL (e.g. http://target.com)"},
+                    "wordlist": {"type": "string", "description": "Wordlist path", "default": "/usr/share/wordlists/dirb/common.txt"},
+                    "timeout": {"type": "integer", "default": 300}
+                },
+                "required": ["url"]
+            }
         )
     ]
 
@@ -387,37 +417,64 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── CUSTOM ──────────────────────────────────────────────────────────
-    elif name == "nmap_custom":
-        command = arguments["command"]
-        timeout = arguments.get("timeout", 300)
-
-        # Safety check — block obviously dangerous flags
-        blocked = ["--script=broadcast", "--send-eth", "--unprivileged"]
-        for b in blocked:
-            if b in command:
-                return [types.TextContent(type="text", text=json.dumps({
-                    "error": f"Blocked flag detected: {b}",
-                    "success": False
-                }))]
-
-        # Ensure XML output
-        if "-oX" not in command:
-            command += " -oX -"
-
-        raw = run_command(command, timeout)
-        parsed = parse_nmap_xml(raw["stdout"]) if raw["success"] else {}
-
-        result = {
-            "tool": "nmap_custom",
-            "command": command,
+    # ── SUBFINDER ───────────────────────────────────────────────────────
+    elif name == "subfinder":
+        domain = arguments["domain"]
+        timeout = arguments.get("timeout", 180)
+        cmd = f"subfinder -d {domain} -silent"
+        raw = run_command(cmd, timeout)
+        return [types.TextContent(type="text", text=json.dumps({
+            "tool": "subfinder",
+            "domain": domain,
             "success": raw["success"],
-            "timestamp": datetime.now().isoformat(),
-            "parsed": parsed,
-            "stderr": raw["stderr"] if not raw["success"] else ""
-        }
+            "subdomains": raw["stdout"].strip().split("\n") if raw["stdout"] else [],
+            "stderr": raw["stderr"]
+        }, indent=2))]
 
-        return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
+    # ── HTTPX ───────────────────────────────────────────────────────────
+    elif name == "httpx":
+        target = arguments["target"]
+        options = arguments.get("options", "-status-code -title -tech-detect")
+        timeout = arguments.get("timeout", 120)
+        cmd = f"echo {target} | httpx {options} -silent"
+        raw = run_command(cmd, timeout)
+        return [types.TextContent(type="text", text=json.dumps({
+            "tool": "httpx",
+            "target": target,
+            "success": raw["success"],
+            "output": raw["stdout"].strip(),
+            "stderr": raw["stderr"]
+        }, indent=2))]
+
+    # ── FFUF ────────────────────────────────────────────────────────────
+    elif name == "ffuf":
+        url = arguments["url"]
+        wordlist = arguments.get("wordlist", "/usr/share/wordlists/dirb/common.txt")
+        timeout = arguments.get("timeout", 300)
+        cmd = f"ffuf -u {url} -w {wordlist} -mc 200,301,302,403 -s"
+        raw = run_command(cmd, timeout)
+        return [types.TextContent(type="text", text=json.dumps({
+            "tool": "ffuf",
+            "url": url,
+            "success": raw["success"],
+            "output": raw["stdout"].strip(),
+            "stderr": raw["stderr"]
+        }, indent=2))]
+
+    # ── GOBUSTER ────────────────────────────────────────────────────────
+    elif name == "gobuster":
+        url = arguments["url"]
+        wordlist = arguments.get("wordlist", "/usr/share/wordlists/dirb/common.txt")
+        timeout = arguments.get("timeout", 300)
+        cmd = f"gobuster dir -u {url} -w {wordlist} -q -n"
+        raw = run_command(cmd, timeout)
+        return [types.TextContent(type="text", text=json.dumps({
+            "tool": "gobuster",
+            "url": url,
+            "success": raw["success"],
+            "output": raw["stdout"].strip(),
+            "stderr": raw["stderr"]
+        }, indent=2))]
 
     else:
         return [types.TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]

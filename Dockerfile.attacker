@@ -13,15 +13,33 @@ RUN apt update && apt install -y \
     whois \
     exploitdb \
     hydra \
-    iputils-ping openvpn\
+    iputils-ping \
     nmap \
     smbclient \
     tmux \
     wget \
     netcat-traditional \
+    sqlmap \
+    gobuster \
+    ffuf \
+    unzip \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall && chmod 755 msfinstall && ./msfinstall
+# Install ProjectDiscovery Tools (Subfinder, Nuclei, Httpx)
+RUN GOBIN=/usr/local/bin go install -v github.com/projectdiscovery/subfinder/v2/cmd/subfinder@latest || \
+    (wget https://github.com/projectdiscovery/subfinder/releases/download/v2.6.7/subfinder_2.6.7_linux_amd64.zip && \
+    unzip subfinder_2.6.7_linux_amd64.zip && mv subfinder /usr/local/bin/ && rm subfinder_2.6.7_linux_amd64.zip)
 
+RUN GOBIN=/usr/local/bin go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest || \
+    (wget https://github.com/projectdiscovery/nuclei/releases/download/v3.3.0/nuclei_3.3.0_linux_amd64.zip && \
+    unzip nuclei_3.3.0_linux_amd64.zip && mv nuclei /usr/local/bin/ && rm nuclei_3.3.0_linux_amd64.zip)
+
+RUN GOBIN=/usr/local/bin go install -v github.com/projectdiscovery/httpx/v1/cmd/httpx@latest || \
+    (wget https://github.com/projectdiscovery/httpx/releases/download/v1.6.9/httpx_1.6.9_linux_amd64.zip && \
+    unzip httpx_1.6.9_linux_amd64.zip && mv httpx /usr/local/bin/ && rm httpx_1.6.9_linux_amd64.zip)
+
+# Install Metasploit
+RUN curl https://raw.githubusercontent.com/rapid7/metasploit-omnibus/master/config/templates/metasploit-framework-wrappers/msfupdate.erb > msfinstall && \
+    chmod 755 msfinstall && ./msfinstall && rm msfinstall
 
 CMD ["/bin/bash"]

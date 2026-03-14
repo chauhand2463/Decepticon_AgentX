@@ -27,6 +27,39 @@ model_manager = get_model_manager()
 theme_ui = ThemeUIComponent()
 model_selection = ModelSelectionComponent()
 
+def _inject_background_effects():
+    """
+    Injects a high-tech Particles.js background and custom HUD styling.
+    """
+    particles_js = """
+    <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+    <div id="particles-js" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; z-index: -1;"></div>
+    <script>
+        particlesJS('particles-js', {
+            "particles": {
+                "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
+                "color": { "value": "#1e293b" },
+                "shape": { "type": "circle" },
+                "opacity": { "value": 0.5, "random": true },
+                "size": { "value": 2, "random": true },
+                "line_linked": { "enable": true, "distance": 150, "color": "#1e293b", "opacity": 0.4, "width": 1 },
+                "move": { "enable": true, "speed": 1, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false }
+            },
+            "interactivity": {
+                "detect_on": "canvas",
+                "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+                "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 1 } }, "push": { "particles_nb": 4 } }
+            },
+            "retina_detect": true
+        });
+    </script>
+    <style>
+        #particles-js canvas { display: block; vertical-align: bottom; }
+        .stApp { background: transparent !important; }
+    </style>
+    """
+    st.components.v1.html(particles_js, height=0, width=0)
+
 def main():
 
     st.set_page_config(
@@ -37,6 +70,8 @@ def main():
 
     current_theme = "dark" if st.session_state.get('dark_mode', True) else "light"
     theme_ui.apply_theme_css(current_theme)
+
+    _inject_background_effects()
 
     st.logo(ICON_TEXT, icon_image=ICON, size="large", link=COMPANY_LINK)
 
@@ -76,7 +111,8 @@ def _perform_model_initialization_in_container(model_info):
 
     try:
         with st.spinner(f"Initializing {model_info.get('display_name', 'Model')}..."):
-            success = asyncio.run(executor_manager.initialize_with_model(model_info))
+            from src.utils.async_runner import run_async
+            success = run_async(executor_manager.initialize_with_model(model_info))
 
         if success:
             st.session_state.executor_ready = True

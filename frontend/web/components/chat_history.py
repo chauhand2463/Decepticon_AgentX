@@ -31,7 +31,7 @@ class ChatHistoryComponent:
     def render_empty_state(self):
 
         st.info("📭 No chat sessions found")
-        st.markdown()
+        st.markdown("<br>", unsafe_allow_html=True)
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
@@ -213,7 +213,7 @@ class ChatHistoryComponent:
 
     def hide_sidebar(self):
 
-        st.markdown(, unsafe_allow_html=True)
+        st.markdown("<style>section[data-testid='stSidebar'] { display: none; }</style>", unsafe_allow_html=True)
 
     def show_loading_state(self, message: str = "Loading sessions..."):
 

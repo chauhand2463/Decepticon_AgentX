@@ -8,6 +8,10 @@ from src.agents.swarm.Scout import make_scout_agent
 from src.agents.swarm.Triage import make_triage_agent
 from src.agents.swarm.Guardian import make_guardian_agent
 from src.agents.swarm.Analyst import make_analyst_agent
+from src.agents.swarm.Execution import make_execution_agent
+from src.agents.swarm.Persistence import make_persistence_agent
+from src.agents.swarm.PrivEscalation import make_privilege_escalation_agent
+from src.agents.swarm.DefenseEvasion import make_defense_evasion_agent
 from src.utils.swarm.swarm import create_swarm
 from src.utils.memory import get_checkpointer, get_store
 import asyncio
@@ -30,7 +34,16 @@ async def create_agents():
     triage = await make_triage_agent()
     guardian = await make_guardian_agent()
     analyst = await make_analyst_agent()
-    return [recon, initaccess, planner, summary, researcher, bounty, scout, triage, guardian, analyst]
+    execution = await make_execution_agent()
+    persistence = await make_persistence_agent()
+    privesc = await make_privilege_escalation_agent()
+    defense = await make_defense_evasion_agent()
+    
+    return [
+        recon, initaccess, planner, summary, researcher, 
+        bounty, scout, triage, guardian, analyst,
+        execution, persistence, privesc, defense
+    ]
 
 async def create_dynamic_swarm():
 

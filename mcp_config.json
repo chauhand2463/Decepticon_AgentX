@@ -81,6 +81,42 @@
       }
     }
   },
+  "execution": {
+    "model": "claude_sonnet_3_7",
+    "metasploit": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/metasploit_server.py"
+      ],
+      "env": {
+        "MSF_HOST": "127.0.0.1",
+        "MSF_PORT": "55553",
+        "MSF_PASS": "decepticon_pass"
+      }
+    }
+  },
+  "persistence": {
+    "model": "deepseek_v3"
+  },
+  "privilege_escalation": {
+    "model": "deepseek_r1",
+    "metasploit": {
+      "transport": "stdio",
+      "command": "python",
+      "args": [
+        "mcp_servers/metasploit_server.py"
+      ],
+      "env": {
+        "MSF_HOST": "127.0.0.1",
+        "MSF_PORT": "55553",
+        "MSF_PASS": "decepticon_pass"
+      }
+    }
+  },
+  "defense_evasion": {
+    "model": "deepseek_v3"
+  },
   "researcher": {
     "model": "gemini_2_0_flash",
     "nuclei": {

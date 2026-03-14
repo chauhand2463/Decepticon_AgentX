@@ -1,217 +1,107 @@
 
+/* 
+ * DECEPTICON - TACTICAL HUD DARK THEME
+ * Inspired by Shadcn Slate/Zinc with Brutalist Hacks.
+ */
+
+:root {
+    --slate-50: #f8fafc;
+    --slate-100: #f1f5f9;
+    --slate-400: #94a3b8;
+    --slate-800: #1e293b;
+    --slate-900: #0f172a;
+    --slate-950: #020617;
+    
+    --emerald-500: #10b981;
+    --amber-500: #f59e0b;
+    --rose-500: #f43f5e;
+}
 
 .main {
-    background-color: #0e1117;
-    color: #FAFAFA;
-}
-.stApp {
-    background-color: #0e1117;
-}
-.stChatMessage {
-    background-color: rgba(45, 45, 45, 0.2);
+    background-color: var(--slate-950);
+    color: var(--slate-50);
 }
 
+.stApp {
+    background-color: var(--slate-950);
+}
+
+/* Sidebar Overhaul */
 .stSidebar {
     background-color: #0B0B12 !important;
-    color: #FAFAFA !important;
+    border-right: 1px solid var(--slate-900) !important;
 }
-.stSidebar [data-testid="stSidebar"] {
-    background-color: #0B0B12 !important;
-}
+
 .stSidebar [data-testid="stSidebarNav"] {
-    background-color: #0B0B12 !important;
-}
-.stSidebar [data-testid="stSidebarContent"] {
-    background-color: #0B0B12 !important;
-}
-.stSidebar .sidebar-content {
-    background-color: #0B0B12 !important;
+    background-color: transparent !important;
 }
 
-.stSidebar h1, .stSidebar h2, .stSidebar h3, .stSidebar h4, .stSidebar h5, .stSidebar h6 {
-    color: #FAFAFA !important;
-}
-.stSidebar p, .stSidebar div, .stSidebar span {
-    color: #FAFAFA !important;
-}
 .stSidebar button {
-    background-color: #262730 !important;
-    color: #FAFAFA !important;
-    border: 1px solid #404040 !important;
-    border-radius: 6px !important;
-    padding: 8px 16px !important;
-    font-weight: 500 !important;
-    transition: all 0.2s ease !important;
+    background-color: var(--slate-900) !important;
+    color: var(--slate-400) !important;
+    border: 1px solid var(--slate-800) !important;
+    border-radius: 0 !important; /* Sharp */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 11px !important;
 }
+
 .stSidebar button:hover {
-    background-color: #404040 !important;
-    color: #FFFFFF !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
-}
-.stSidebar button:active {
-    background-color: #FF4B4B !important;
-    color: #FFFFFF !important;
-    transform: translateY(0px) !important;
+    background-color: var(--slate-800) !important;
+    color: var(--slate-100) !important;
+    border-color: var(--slate-400) !important;
 }
 
+/* Chat Overhaul */
+.stChatMessage {
+    background-color: rgba(15, 23, 42, 0.4) !important;
+    border: 1px solid rgba(30, 41, 59, 0.5) !important;
+    margin-bottom: 20px !important;
+    padding: 20px !important;
+}
+
+.stChatMessageAvatar {
+    border-radius: 0 !important;
+    background-color: var(--slate-900) !important;
+}
+
+/* Terminal UI Refinement */
 .terminal-container {
-    background-color: #1E1E1E;
-    color: #FFFFFF;
+    background-color: #020617 !important;
+    border: 1px solid var(--slate-800) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6) !important;
 }
+
 .terminal-header {
-    background-color: #333333;
-}
-.terminal-prompt {
-    color: #4EC9B0;
-}
-.terminal-command {
-    color: #DCDCAA;
-}
-.terminal-output {
-    color: #CCCCCC;
-}
-.terminal-success {
-    color: #6A9955;
-}
-.terminal-error {
-    color: #F14C4C;
-}
-.terminal-warning {
-    color: #DCDCAA;
+    background-color: var(--slate-900) !important;
+    border-bottom: 1px solid var(--slate-800) !important;
 }
 
+/* Code Blocks */
 pre[data-testid="stCodeBlock"] {
-    background-color: #1E1E2E !important;
-    border-radius: 5px;
-    padding: 15px !important;
-    margin: 10px 0;
-    border-left: 4px solid #4EC9B0;
-    font-family: 'Courier New', monospace;
-    font-size: 14px !important;
-    overflow-x: auto;
-    white-space: pre-wrap !important;
-    word-wrap: break-word;
+    background-color: #050a14 !important;
+    border: 1px solid var(--slate-900) !important;
+    border-radius: 0 !important;
+    border-left: 2px solid var(--emerald-500) !important;
 }
 
-div.stChatMessage[data-testid="stChatMessage"]:has(div strong:contains("Planner")) pre[data-testid="stCodeBlock"] {
-    background-color: #192231 !important;
-    border-left: 4px solid #FF8F40;
-}
+/* Agent States in Chat */
+.supervisor-message strong { color: var(--rose-500) !important; }
+.planner-message strong { color: #38bdf8 !important; }
+.recon-message strong { color: #a855f7 !important; }
+.tool-message strong { color: var(--emerald-500) !important; }
 
-.agent-status {
-    background: linear-gradient(to right, #222222, #2d2d2d, #222222);
-    border: 2px solid transparent;
-    color: #f0f0f0;
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
 }
-.agent-status div {
-    color: #f0f0f0;
+::-webkit-scrollbar-track {
+    background: var(--slate-950);
 }
-.agent-status:hover {
-    background: linear-gradient(to right, #262626, #323232, #262626);
+::-webkit-scrollbar-thumb {
+    background: var(--slate-800);
 }
-.agent-status.status-active {
-    background: linear-gradient(to right, #3a1515, #4a1f1f, #3a1515);
-    border: 2px solid #ff4b4b !important;
-    box-shadow: 0 0 8px #ff4b4b;
-    animation: pulse-button-dark 1.5s infinite alternate;
-    text-shadow: 0 0 8px rgba(255, 75, 75, 0.8);
-    font-weight: bold;
-}
-.agent-status.status-completed {
-    background: linear-gradient(to right, #152315, #1e3a1e, #152315);
-    border: 2px solid #4CAF50;
-}
-.agent-status.status-next {
-    background: linear-gradient(to right, #332b15, #403621, #332b15);
-    border: 2px dashed #FFC107 !important;
-}
-
-@keyframes pulse-button-dark {
-    0% {
-        background-color: rgba(255, 75, 75, 0.2);
-        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0.7);
-    }
-    50% {
-        background-color: rgba(255, 75, 75, 0.4);
-        box-shadow: 0 0 20px 5px rgba(255, 75, 75, 0.9);
-        border-color: rgba(255, 75, 75, 1);
-    }
-    100% {
-        background-color: rgba(255, 75, 75, 0.2);
-        box-shadow: 0 0 0 0 rgba(255, 75, 75, 0);
-    }
-}
-
-.agent-header {
-    color: #f0f0f0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-div.stChatMessage[data-testid="stChatMessage"]:has(.supervisor-message) {
-    border-left: 5px solid #fd6262;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.planner-message) {
-    border-left: 5px solid #4dabf7;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.recon-message) {
-    border-left: 5px solid #7950f2;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.initaccess-message) {
-    border-left: 5px solid #fab005;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.execution-message) {
-    border-left: 5px solid #f76707;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.persistence-message) {
-    border-left: 5px solid #ae3ec9;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.privilege-escalation-message) {
-    border-left: 5px solid #d6336c;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.defense-evasion-message) {
-    border-left: 5px solid #1098ad;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.tool-message) {
-    border-left: 5px solid #82c91e;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.tool-output-message) {
-    border-left: 5px solid #82c91e;
-}
-div.stChatMessage[data-testid="stChatMessage"]:has(.agent-message) {
-    border-left: 5px solid #9775fa;
-}
-
-.supervisor-message strong {
-    color: #fd6262;
-}
-.planner-message strong {
-    color: #4dabf7;
-}
-.recon-message strong {
-    color: #7950f2;
-}
-.initaccess-message strong {
-    color: #fab005;
-}
-.execution-message strong {
-    color: #f76707;
-}
-.persistence-message strong {
-    color: #ae3ec9;
-}
-.privilege-escalation-message strong {
-    color: #d6336c;
-}
-.defense-evasion-message strong {
-    color: #1098ad;
-}
-.tool-message strong {
-    color: #82c91e;
-}
-.tool-output-message strong {
-    color: #82c91e;
-}
-.agent-message strong {
-    color: #9775fa;
+::-webkit-scrollbar-thumb:hover {
+    background: var(--slate-400);
 }

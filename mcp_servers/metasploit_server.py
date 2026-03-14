@@ -19,6 +19,7 @@ from typing import Optional
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types
+from docker_utils import run_in_container
 
 # ── Try to import pymetasploit3 ────────────────────────────────────────
 try:
@@ -42,11 +43,21 @@ def get_msf_client(host="127.0.0.1", port=55553, password="decepticon_pass", ssl
         return None, "pymetasploit3 not installed. Run: pip install pymetasploit3"
     if _msf_client is not None:
         return _msf_client, None
+
+    # Check if msfrpcd is running in the container
+    check_msf = run_in_container("pgrep msfrpcd")
+    if not check_msf["success"]:
+        # Start msfrpcd in the container
+        start_msf = run_in_container(f"msfrpcd -P {password} -u msf -a 0.0.0.0 -p {port} -S")
+        if not start_msf["success"]:
+            return None, f"Failed to start msfrpcd in container: {start_msf['stderr']}"
+        time.sleep(5) # Wait for it to start
+
     try:
         _msf_client = MsfRpcClient(password, server=host, port=port, ssl=ssl)
         return _msf_client, None
     except Exception as e:
-        return None, f"Cannot connect to msfrpcd: {str(e)}. Start it with: msfrpcd -P decepticon_pass -u msf -a 127.0.0.1 -p 55553 -S"
+        return None, f"Cannot connect to msfrpcd on {host}:{port}: {str(e)}"
 
 
 def msf_error(msg: str) -> list[types.TextContent]:

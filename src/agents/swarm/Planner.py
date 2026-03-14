@@ -2,7 +2,7 @@ from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langmem import create_manage_memory_tool, create_search_memory_tool
 from src.prompts.prompt_loader import load_prompt
-from src.tools.handoff import handoff_to_initial_access, handoff_to_reconnaissance, handoff_to_summary, handoff_to_researcher
+from src.tools.handoff import handoff_to_initial_access, handoff_to_reconnaissance, handoff_to_summary, handoff_to_researcher, handoff_to_execution, handoff_to_persistence, handoff_to_privilege_escalation, handoff_to_defense_evasion
 from src.utils.llm.config_manager import get_current_llm
 from src.utils.memory import get_store
 from langchain_anthropic import ChatAnthropic
@@ -23,6 +23,10 @@ async def make_planner_agent():
         handoff_to_reconnaissance,
         handoff_to_researcher,
         handoff_to_initial_access,
+        handoff_to_execution,
+        handoff_to_persistence,
+        handoff_to_privilege_escalation,
+        handoff_to_defense_evasion,
         handoff_to_summary,
     ]
 

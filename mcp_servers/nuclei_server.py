@@ -8,13 +8,10 @@ Run:     python mcp_servers/nuclei_server.py
 
 import asyncio
 import json
-import subprocess
-import shlex
-import re
-from datetime import datetime
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types
+from docker_utils import run_in_container
 
 app = Server("decepticon-nuclei")
 
@@ -24,25 +21,8 @@ app = Server("decepticon-nuclei")
 # ─────────────────────────────────────────────
 
 def run_command(cmd: str, timeout: int = 600) -> dict:
-    try:
-        result = subprocess.run(
-            shlex.split(cmd),
-            capture_output=True,
-            text=True,
-            timeout=timeout
-        )
-        return {
-            "stdout": result.stdout,
-            "stderr": result.stderr,
-            "returncode": result.returncode,
-            "success": result.returncode == 0
-        }
-    except subprocess.TimeoutExpired:
-        return {"stdout": "", "stderr": f"Timed out after {timeout}s", "returncode": -1, "success": False}
-    except FileNotFoundError:
-        return {"stdout": "", "stderr": "nuclei not found. Install: go install github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest", "returncode": -1, "success": False}
-    except Exception as e:
-        return {"stdout": "", "stderr": str(e), "returncode": -1, "success": False}
+    """Run a shell command inside the attacker container."""
+    return run_in_container(cmd, timeout)
 
 
 def parse_nuclei_jsonl(raw_output: str) -> list:
