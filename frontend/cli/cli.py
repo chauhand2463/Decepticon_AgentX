@@ -49,6 +49,7 @@ from src.utils.llm.models import (
     validate_api_key
 )
 from src.graphs.swarm import create_dynamic_swarm
+from src.swarm.graph_fixed import run_mission
 from src.utils.llm.config_manager import (
     update_llm_config,
     get_current_llm_config,
@@ -848,188 +849,49 @@ class DECEPTICONCLI:
 
         self.processed_message_ids = set()
 
-        inputs = {"messages": [HumanMessage(content=user_input)]}
+        try:
+            # Use the fixed graph to run the mission
+            result = await run_mission(user_input, self.current_llm, self.agents_config)
 
-        agent_responses = {}
-        step_count = 0
-        event_count = 0
+            # Display results
+            completion_panel = Panel(
+                f"[bold green]✅ Mission Completed[/bold green]\n\n"
+                f"[cyan]📊 Phase:[/cyan] {result.get('phase', 'unknown')}\n"
+                f"[cyan]🎯 Target:[/cyan] {result.get('target', 'unknown')}\n"
+                f"[cyan]🔍 Ports Found:[/cyan] {len(result.get('open_ports', []))}\n"
+                f"[cyan]🛡️ CVEs Found:[/cyan] {len(result.get('cves', []))}\n"
+                f"[cyan]🔓 Exploited:[/cyan] {result.get('exploitation_success', False)}\n"
+                f"[cyan]🕒 Time:[/cyan] {datetime.now().strftime('%H:%M:%S')}",
+                box=box.ROUNDED,
+                border_style="green",
+                title="[bold green]🎉 Mission Success[/bold green]"
+            )
+            self.console.print(completion_panel)
 
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            console=self.console,
-            transient=True
-        ) as progress:
-            main_task = progress.add_task("[bold green]🤖 Working...", total=None)
-
-            try:
-                async for namespace, output in self.swarm.astream(
-                    inputs,
-                    stream_mode="updates",
-                    config=self.config if self.config else None,
-                    subgraphs=True
-                ):
-                    step_count += 1
-                    event_count += 1
-
-                    if isinstance(output, dict):
-                        for node, value in output.items():
-
-                            agent_name = get_agent_name(namespace)
-
-                            if "messages" in value and value["messages"]:
-                                messages = value["messages"]
-                                if messages:
-                                    latest_message = messages[-1]
-                                    should_display, message_type = self.should_display_message(
-                                        latest_message, agent_name, step_count
-                                    )
-
-                                    if should_display:
-                                        progress.stop()
-
-                                        if message_type == "ai":
-
-                                            original_content = extract_message_content(latest_message, escape_markup=False)
-
-                                            safe_content = extract_message_content(latest_message, escape_markup=True)
-
-                                            tool_calls = extract_tool_calls(latest_message)
-
-                                            self.logger.log_agent_response(
-                                                agent_name=agent_name,
-                                                content=original_content,
-                                                tool_calls=tool_calls if tool_calls else None
-                                            )
-
-                                            try:
-
-                                                agent_color = AgentManager.get_cli_color(agent_name)
-
-                                                content_markdown = Markdown(safe_content)
-
-                                                if tool_calls:
-
-                                                    tool_call_info = []
-                                                    for i, tool_call in enumerate(tool_calls, 1):
-                                                        tool_name = tool_call.get('name', 'Unknown Tool')
-                                                        tool_args = tool_call.get('args', {})
-
-                                                        tool_call_message = parse_tool_call(tool_call)
-
-                                                        tool_call_info.append(f"[bold cyan]{tool_call_message}[/bold cyan]")
-
-                                                        if tool_args:
-                                                            args_str = ", ".join([f"{k}={v}" for k, v in tool_args.items()])
-                                                            if len(args_str) > 100:
-                                                                args_str = args_str[:100] + "..."
-                                                            tool_call_info.append(f"  [dim]→ {args_str}[/dim]")
-
-                                                    if original_content.strip():
-                                                        combined_content = Group(
-                                                            content_markdown,
-                                                            "\n".join(tool_call_info)
-                                                        )
-                                                    else:
-                                                        combined_content = "\n".join(tool_call_info)
-
-                                                    agent_panel = Panel(
-                                                        combined_content,
-                                                        box=box.ROUNDED,
-                                                        border_style=agent_color,
-                                                        title=f"[{agent_color} bold]{agent_name}[/{agent_color} bold]"
-                                                    )
-                                                else:
-
-                                                    agent_panel = Panel(
-                                                        content_markdown,
-                                                        box=box.ROUNDED,
-                                                        border_style=agent_color,
-                                                        title=f"[{agent_color} bold]{agent_name}[/{agent_color} bold]"
-                                                    )
-
-                                                self.console.print(agent_panel)
-                                            except Exception as panel_error:
-
-                                                self.console.print(f"[{agent_name}]: {safe_content}")
-
-                                            if agent_name not in agent_responses:
-                                                agent_responses[agent_name] = []
-                                            agent_responses[agent_name].append(safe_content)
-
-                                        elif message_type == "tool":
-
-                                            original_content = extract_message_content(latest_message, escape_markup=False)
-
-                                            safe_content = extract_message_content(latest_message, escape_markup=True)
-
-                                            tool_name = getattr(latest_message, 'name', 'Unknown Tool')
-                                            tool_display_name = parse_tool_name(tool_name)
-
-                                            self.logger.log_tool_output(
-                                                tool_name=tool_name,
-                                                output=original_content
-                                            )
-
-                                            tool_color = "green"
-
-                                            try:
-                                                tool_panel = Panel(
-                                                    safe_content,
-                                                    box=box.ROUNDED,
-                                                    border_style=tool_color,
-                                                    title=f"[bold {tool_color}]{tool_display_name}[/bold {tool_color}]"
-                                                )
-                                                self.console.print(tool_panel)
-                                            except Exception as panel_error:
-
-                                                fallback_output = f"[{tool_display_name}]: {safe_content}"
-                                                self.console.print(fallback_output)
-
-                                    progress.start()
-                                    progress.update(main_task, description=f"[bold blue]🤖 Working... [/bold blue]")
-
-                progress.update(main_task, description="[bold green]✅ Workflow completed!")
-                time.sleep(1)
-                progress.stop()
-
-                self.logger.save_session()
-
-                completion_panel = Panel(
-                    f"[bold green]✅ Operation Completed[/bold green]\n\n"
-                    f"[cyan]📊 Agents:[/cyan] {', '.join(agent_responses.keys())}\n"
-                    f"[cyan]📝 Responses:[/cyan] {sum(len(responses) for responses in agent_responses.values())}\n"
-                    f"[cyan]🔄 Steps:[/cyan] {step_count}\n"
-                    f"[cyan]🕒 Time:[/cyan] {datetime.now().strftime('%H:%M:%S')}",
+            # Display final report if available
+            if result.get('final_report'):
+                report_panel = Panel(
+                    result['final_report'],
                     box=box.ROUNDED,
-                    border_style="green",
-                    title="[bold green]🎉 Success[/bold green]"
+                    border_style="blue",
+                    title="[bold blue]📄 Final Report[/bold blue]"
                 )
-                self.console.print(completion_panel)
+                self.console.print(report_panel)
 
-                return True
+            self.logger.save_session()
+            return True
 
-            except Exception as e:
-                progress.update(main_task, description=f"[bold red]❌ Error: {str(e)}")
-                time.sleep(2)
-                progress.stop()
-
-                try:
-                    self.logger.save_session()
-                except Exception as log_error:
-                    self.console.print(f"[yellow]Warning: Failed to save session: {log_error}[/yellow]")
-
-                error_panel = Panel(
-                    f"[bold red]❌ Workflow Error[/bold red]\n\n"
-                    f"[yellow]Error:[/yellow] {str(e)}\n"
-                    f"[yellow]Events processed:[/yellow] {event_count if 'event_count' in locals() else 'Unknown'}\n"
-                    f"[dim]Please try again[/dim]",
-                    box=box.ROUNDED,
-                    border_style="red",
-                    title="[bold red]⚠️ Error[/bold red]"
-                )
-                self.console.print(error_panel)
-                return False
+        except Exception as e:
+            error_panel = Panel(
+                f"[bold red]❌ Mission Failed[/bold red]\n\n"
+                f"[yellow]Error:[/yellow] {str(e)}\n"
+                f"[dim]Please try again[/dim]",
+                box=box.ROUNDED,
+                border_style="red",
+                title="[bold red]⚠️ Mission Error[/bold red]"
+            )
+            self.console.print(error_panel)
+            return False
 
     async def interactive_session(self):
 

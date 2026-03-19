@@ -8,6 +8,7 @@ Run:     python mcp_servers/sqlmap_server.py
 
 import asyncio
 import json
+import os
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types

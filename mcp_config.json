@@ -39,6 +39,11 @@
       "provider": "openrouter",
       "model": "deepseek/deepseek-reasoner",
       "env_key": "OPENROUTER_API_KEY"
+    },
+    "xploiter": {
+      "provider": "ollama",
+      "model": "xploiter:latest",
+      "env_key": "OLLAMA_API_KEY"
     }
   },
   "planner": {

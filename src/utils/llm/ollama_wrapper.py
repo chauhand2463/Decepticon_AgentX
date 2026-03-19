@@ -39,7 +39,9 @@ class OllamaToolWrapper:
             if "does not support tools" in error_str or "400" in error_str:
                 logger.warning(f"Ollama native tool call failed, falling back to text-prompting for {self.name}")
                 return await self._fallback_ainvoke(input, config, **kwargs)
-            raise e
+            else:
+                logger.error(f"Unexpected error in Ollama model: {error_str}")
+                raise e
 
     async def _fallback_ainvoke(self, input: Union[str, List[BaseMessage]], config: Optional[Any] = None, **kwargs: Any) -> BaseMessage:
         """

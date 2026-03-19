@@ -14,6 +14,7 @@ from src.agents.swarm.PrivEscalation import make_privilege_escalation_agent
 from src.agents.swarm.DefenseEvasion import make_defense_evasion_agent
 from src.utils.swarm.swarm import create_swarm
 from src.utils.memory import get_checkpointer, get_store
+from src.swarm.graph_fixed import build_decepticon_graph_no_mcp
 import asyncio
 import logging
 
@@ -62,3 +63,10 @@ async def create_dynamic_swarm():
 
     logger.info("Swarm compiled with InMemory checkpointer and store")
     return compiled_workflow
+
+async def create_fixed_swarm(llm):
+    """Create the fixed swarm graph without MCP tools."""
+    logger.info("Creating fixed swarm graph")
+    graph = await build_decepticon_graph_no_mcp(llm)
+    logger.info("Fixed swarm graph created")
+    return graph

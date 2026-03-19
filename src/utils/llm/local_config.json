@@ -93,5 +93,10 @@
     "display_name": "[Vision] BakLLaVA (7B)",
     "model_name": "bakllava:7b",
     "provider": "ollama"
+  },
+  {
+    "display_name": "[Xploiter] Xploiter (Latest)",
+    "model_name": "xploiter:latest",
+    "provider": "ollama"
   }
 ]
