@@ -25,6 +25,9 @@ class WorkflowHandler:
                 "can_execute": False,
                 "error_message": "AI agents not ready. Please initialize first."
             }
+            
+        if "workflow_running" not in st.session_state:
+            st.session_state.workflow_running = False
 
         if st.session_state.workflow_running:
             return {

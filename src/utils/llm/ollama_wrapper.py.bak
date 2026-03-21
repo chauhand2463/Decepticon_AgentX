@@ -1,0 +1,127 @@
+
+from typing import Any, List, Optional, Union, Dict
+import json
+import re
+from langchain_core.messages import BaseMessage, AIMessage, ToolMessage, SystemMessage
+from langchain_core.outputs import ChatResult, ChatGeneration
+from langchain_ollama import ChatOllama
+import logging
+
+logger = logging.getLogger(__name__)
+
+class OllamaToolWrapper:
+    """
+    A wrapper for ChatOllama that handles models that might not support native tool calling
+    by providing better error handling or fallback mechanisms.
+    """
+    def __init__(self, llm: ChatOllama):
+        self.llm = llm
+        self.name = getattr(llm, "model", "Ollama Model")
+
+    def bind_tools(self, tools: List[Any], **kwargs: Any) -> Any:
+        self.tools = tools
+        try:
+            # Try native binding first
+            return self.llm.bind_tools(tools, **kwargs)
+        except Exception as e:
+            logger.warning(f"Native tool binding failed for {self.name}: {e}")
+            # If native binding fails, we store the tools and will use text-based fallback
+            return self
+
+    def __call__(
+        self,
+        input: Union[str, List[BaseMessage]],
+        config: Optional[Any] = None,
+        **kwargs: Any,
+    ) -> BaseMessage:
+        safe_config = config if isinstance(config, dict) else {}
+        return self.invoke(input, config=safe_config, **kwargs)
+
+    def __getattr__(self, name: str) -> Any:
+        return getattr(self.llm, name)
+
+    async def ainvoke(self, input: Union[str, List[BaseMessage]], config: Optional[Any] = None, **kwargs: Any) -> BaseMessage:
+        safe_config = config if isinstance(config, dict) else {}
+        try:
+            return await self.llm.ainvoke(input, config=safe_config, **kwargs)
+        except Exception as e:
+            error_str = str(e)
+            if "does not support tools" in error_str or "400" in error_str:
+                logger.warning(f"Ollama native tool call failed, falling back to text-prompting for {self.name}")
+                return await self._fallback_ainvoke(input, config=safe_config, **kwargs)
+            else:
+                logger.error(f"Unexpected error in Ollama model: {error_str}")
+                raise e
+
+    async def _fallback_ainvoke(self, input: Union[str, List[BaseMessage]], config: Optional[Any] = None, **kwargs: Any) -> BaseMessage:
+        """
+        Fallback implementation that injects tools into the prompt and parses JSON output.
+        """
+        if not hasattr(self, "tools") or not self.tools:
+            # If no tools were bound, just try invoking without tools
+            safe_config = config if isinstance(config, dict) else {}
+            return await self.llm.ainvoke(input, config=safe_config, **kwargs)
+
+        # 1. Prepare tool definitions
+        tool_desc = []
+        for tool in self.tools:
+            if hasattr(tool, "name"):
+                name = tool.name
+                desc = getattr(tool, "description", "")
+                args = getattr(tool, "args", {})
+                tool_desc.append(f"- {name}: {desc} (Args: {json.dumps(args)})")
+
+        tool_prompt = "\n".join(tool_desc)
+        system_instruction = f"""
+SYSTEM DIRECTIVE: THIS MODEL DOES NOT SUPPORT NATIVE TOOL CALLING.
+You MUST use the following tools by outputting a JSON block:
+TOOLS AVAILABLE:
+{tool_prompt}
+
+To call a tool, use this EXACT format:
+```json
+{{
+  "action": "tool_name",
+  "action_input": {{ "arg1": "val1" }}
+}}
+```
+WAIT for the tool output before continuing.
+"""
+        
+        # 2. Add instruction to messages
+        if isinstance(input, str):
+            messages = [SystemMessage(content=system_instruction), AIMessage(content=input)]
+        else:
+            messages = [SystemMessage(content=system_instruction)] + input
+
+        # 3. Invoke without tools
+        safe_config = config if isinstance(config, dict) else {}
+        response = await self.llm.ainvoke(messages, config=safe_config)
+        
+        # 4. Parse response for tool calls
+        content = response.content
+        json_match = re.search(r"```json\s*(.*?)\s*```", content, re.DOTALL)
+        if json_match:
+            try:
+                tool_data = json.loads(json_match.group(1))
+                action = tool_data.get("action")
+                args = tool_data.get("action_input", {})
+                
+                if action:
+                    # Create a mock tool call for LangGraph integration
+                    return AIMessage(
+                        content=content,
+                        tool_calls=[{
+                            "name": action,
+                            "args": args,
+                            "id": f"call_{re.sub(r'[^a-zA-Z0-9]', '', action)}"
+                        }]
+                    )
+            except Exception as parse_err:
+                logger.error(f"Failed to parse fallback tool call: {parse_err}")
+        
+        return response
+
+    def invoke(self, input: Union[str, List[BaseMessage]], config: Optional[Any] = None, **kwargs: Any) -> BaseMessage:
+        safe_config = config if isinstance(config, dict) else {}
+        return self.llm.invoke(input, config=safe_config, **kwargs)

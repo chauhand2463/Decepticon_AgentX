@@ -1,72 +1,64 @@
-from src.agents.swarm.Recon import make_recon_agent
-from src.agents.swarm.InitAccess import make_initaccess_agent
-from src.agents.swarm.Planner import make_planner_agent
-from src.agents.swarm.Summary import make_summary_agent
-from src.agents.swarm.Researcher import make_researcher_agent
-from src.agents.swarm.Bounty import make_bounty_agent
-from src.agents.swarm.Scout import make_scout_agent
-from src.agents.swarm.Triage import make_triage_agent
-from src.agents.swarm.Guardian import make_guardian_agent
-from src.agents.swarm.Analyst import make_analyst_agent
-from src.agents.swarm.Execution import make_execution_agent
-from src.agents.swarm.Persistence import make_persistence_agent
-from src.agents.swarm.PrivEscalation import make_privilege_escalation_agent
-from src.agents.swarm.DefenseEvasion import make_defense_evasion_agent
-from src.utils.swarm.swarm import create_swarm
-from src.utils.memory import get_checkpointer, get_store
-from src.swarm.graph_fixed import build_decepticon_graph_no_mcp
+"""
+DECEPTICON — Swarm Graph Builder
+Uses the fixed StateGraph from graph_fixed.py with proper edge wiring.
+Agents execute in sequence: PHANTOM → SHADOW → ORACLE → BREACH → CIPHER
+"""
+
+import json
+import os
 import asyncio
 import logging
+
+from src.swarm.graph_fixed import (
+    build_decepticon_graph,
+    build_decepticon_graph_no_mcp,
+    make_initial_state,
+)
+from src.utils.llm.config_manager import get_current_llm
+from src.utils.memory import get_checkpointer, get_store
 
 logger = logging.getLogger(__name__)
 
 checkpointer = get_checkpointer()
 store = get_store()
 
-async def create_agents():
 
-    recon = await make_recon_agent()
-    initaccess = await make_initaccess_agent()
-    planner = await make_planner_agent()
-    summary = await make_summary_agent()
-    researcher = await make_researcher_agent()
-    bounty = await make_bounty_agent()
-    scout = await make_scout_agent()
-    triage = await make_triage_agent()
-    guardian = await make_guardian_agent()
-    analyst = await make_analyst_agent()
-    execution = await make_execution_agent()
-    persistence = await make_persistence_agent()
-    privesc = await make_privilege_escalation_agent()
-    defense = await make_defense_evasion_agent()
-    
-    return [
-        recon, initaccess, planner, summary, researcher, 
-        bounty, scout, triage, guardian, analyst,
-        execution, persistence, privesc, defense
-    ]
+def _load_mcp_config() -> dict:
+    """Load and return the full mcp_config.json dict."""
+    base_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    config_path = os.path.join(base_dir, "mcp_config.json")
+    try:
+        with open(config_path, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        logger.warning("mcp_config.json not found at %s", config_path)
+        return {}
+
 
 async def create_dynamic_swarm():
+    """
+    Build the full 5-agent DECEPTICON graph with MCP tool integration.
+    Flow: PHANTOM → SHADOW → ORACLE → BREACH → CIPHER
+    """
+    logger.info("Creating dynamic swarm with fixed StateGraph")
 
-    logger.info("Creating dynamic swarm with InMemory persistence")
+    llm = get_current_llm()
+    mcp_config = _load_mcp_config()
 
-    agents = await create_agents()
-    workflow = create_swarm(
-        agents=agents,
-        default_active_agent="Planner",
-    )
+    if mcp_config:
+        graph = await build_decepticon_graph(llm, mcp_config)
+    else:
+        graph = await build_decepticon_graph_no_mcp(llm)
 
-    compiled_workflow = workflow.compile(
-        checkpointer=checkpointer,
-        store=store
-    )
+    logger.info("Swarm graph compiled — agents wired with conditional edges")
+    return graph
 
-    logger.info("Swarm compiled with InMemory checkpointer and store")
-    return compiled_workflow
 
-async def create_fixed_swarm(llm):
-    """Create the fixed swarm graph without MCP tools."""
-    logger.info("Creating fixed swarm graph")
+async def create_fixed_swarm(llm=None):
+    """Create the swarm graph without MCP tools (for testing)."""
+    if llm is None:
+        llm = get_current_llm()
+    logger.info("Creating fixed swarm graph (no MCP)")
     graph = await build_decepticon_graph_no_mcp(llm)
     logger.info("Fixed swarm graph created")
     return graph

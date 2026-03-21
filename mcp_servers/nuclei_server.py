@@ -8,6 +8,11 @@ Run:     python mcp_servers/nuclei_server.py
 
 import asyncio
 import json
+import os
+import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types

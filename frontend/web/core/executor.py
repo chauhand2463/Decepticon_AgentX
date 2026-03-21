@@ -103,7 +103,8 @@ class Executor:
 
         self._processed_message_ids = set()
 
-        inputs = {"messages": [HumanMessage(content=user_input)]}
+        from src.swarm.graph_fixed import make_initial_state
+        inputs = make_initial_state(user_input)
 
         try:
             step_count = 0
@@ -112,15 +113,19 @@ class Executor:
                 inputs,
                 stream_mode="updates",
                 config=execution_config,
-                subgraphs=True
             )
 
             async for stream_item in stream_result:
 
-                if not isinstance(stream_item, tuple) or len(stream_item) != 2:
+                # The fixed graph emits dict items: {node_name: {state_updates}}
+                if isinstance(stream_item, tuple) and len(stream_item) == 2:
+                    namespace, output = stream_item
+                elif isinstance(stream_item, dict):
+                    namespace = ()
+                    output = stream_item
+                else:
                     continue
 
-                namespace, output = stream_item
                 step_count += 1
 
                 if not isinstance(output, dict):
@@ -128,7 +133,7 @@ class Executor:
 
                 for node, value in output.items():
 
-                    agent_name = get_agent_name(namespace)
+                    agent_name = node  # Node name is the agent name in the fixed graph
 
                     if isinstance(value, dict) and "messages" in value and value["messages"]:
                         messages = value["messages"]

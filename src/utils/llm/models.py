@@ -1,4 +1,4 @@
-
+﻿
 
 import json
 import os
@@ -229,14 +229,11 @@ def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
 
     elif provider_enum == ModelProvider.OLLAMA:
         from langchain_ollama import ChatOllama
-        from .ollama_wrapper import OllamaToolWrapper
-        # Robust Ollama initialization
-        llm = ChatOllama(
+        return ChatOllama(
             model=model_name,
             temperature=0,
             num_ctx=8192,
         )
-        return OllamaToolWrapper(llm)
 
 
 
@@ -276,3 +273,4 @@ __all__ = [
     "load_local_model_mappings",
     "get_ollama_models_with_mappings"
 ]
+
