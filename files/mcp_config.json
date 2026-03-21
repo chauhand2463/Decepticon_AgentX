@@ -3,7 +3,7 @@
     "note": "Planner uses no MCP tools — it only reads state and outputs mission plans."
   },
 
-  "recon_agent": {
+  "reconnaissance": {
     "nmap": {
       "transport": "stdio",
       "command": "python",
@@ -12,7 +12,7 @@
     }
   },
 
-  "researcher_agent": {
+  "researcher": {
     "nuclei": {
       "transport": "stdio",
       "command": "python",
@@ -21,7 +21,7 @@
     }
   },
 
-  "access_agent": {
+  "initial_access": {
     "sqlmap": {
       "transport": "stdio",
       "command": "python",

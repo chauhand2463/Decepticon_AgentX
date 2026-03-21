@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 # Try to load .env if it exists
 load_dotenv()
 
+
 async def test_recon():
     print("Building graph...")
     # Load MCP config
@@ -23,20 +24,19 @@ async def test_recon():
 
     # Use Sonnet 3.7 as per user preference
     llm = ChatAnthropic(model="claude-3-7-sonnet-latest")
-    
+
     graph = await build_decepticon_graph(llm, mcp_config)
-    
-    state = {
-        "messages": [("user", "Scan 192.168.1.1 with nmap for all ports")]
-    }
-    
+
+    state = {"messages": [("user", "Scan 192.168.1.1 with nmap for all ports")]}
+
     print("Invoking graph...")
     async for event in graph.astream(state):
         for node_name, output in event.items():
             print(f"--- Node: {node_name} ---")
             # We already have debug prints in graph_fixed.py's node_fn
-    
+
     print("Test complete.")
+
 
 if __name__ == "__main__":
     if not os.getenv("ANTHROPIC_API_KEY"):

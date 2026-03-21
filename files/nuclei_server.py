@@ -10,7 +10,6 @@ import asyncio
 import json
 import subprocess
 import shlex
-import re
 from datetime import datetime
 from mcp.server import Server
 from mcp.server.stdio import stdio_server

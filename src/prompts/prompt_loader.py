@@ -1,4 +1,3 @@
-
 from src.prompts.base.terminal import BASE_TERMINAL_PROMPT
 
 from src.prompts.elite_prompts import (
@@ -10,14 +9,10 @@ from src.prompts.elite_prompts import (
     EXECUTION_SYSTEM_PROMPT,
     PERSISTENCE_SYSTEM_PROMPT,
     PRIVILEGE_ESCALATION_SYSTEM_PROMPT,
-    DEFENSE_EVASION_SYSTEM_PROMPT
+    DEFENSE_EVASION_SYSTEM_PROMPT,
 )
 
 # Keep old imports for reference or if needed for other architectures
-from src.prompts.personas.reconnaissance_persona import RECONNAISSANCE_PERSONA_PROMPT
-from src.prompts.personas.initial_access_persona import INITIAL_ACCESS_PERSONA_PROMPT
-from src.prompts.personas.planner_persona import PLANNER_PERSONA_PROMPT
-from src.prompts.personas.summary_persona import SUMMARY_PERSONA_PROMPT
 from src.prompts.personas.supervisor_persona import SUPERVISOR_PERSONA_PROMPT
 from src.prompts.personas.bounty_persona import BOUNTY_PERSONA_PROMPT
 from src.prompts.personas.scout_persona import SCOUT_PERSONA_PROMPT
@@ -48,7 +43,7 @@ PERSONA_PROMPTS = {
     "execution": EXECUTION_SYSTEM_PROMPT,
     "persistence": PERSISTENCE_SYSTEM_PROMPT,
     "privilege_escalation": PRIVILEGE_ESCALATION_SYSTEM_PROMPT,
-    "defense_evasion": DEFENSE_EVASION_SYSTEM_PROMPT
+    "defense_evasion": DEFENSE_EVASION_SYSTEM_PROMPT,
 }
 
 SWARM_PROMPTS = {
@@ -61,14 +56,17 @@ SWARM_PROMPTS = {
     "persistence": "SWARM DIRECTIVE: Maintain access across reboots/sessions. Document cleanup commands.",
     "privilege_escalation": "SWARM DIRECTIVE: Focus on vertical movement (Root/System). Verify escalation path.",
     "defense_evasion": "SWARM DIRECTIVE: Simulate stealth techniques and bypass methods.",
-    "supervisor": ""
+    "supervisor": "",
 }
+
 
 def load_prompt(agent_name: str, architecture: str = "swarm"):
 
     if agent_name not in PERSONA_PROMPTS:
         available_agents = list(PERSONA_PROMPTS.keys())
-        raise ValueError(f"Unknown agent: {agent_name}. Available agents: {available_agents}")
+        raise ValueError(
+            f"Unknown agent: {agent_name}. Available agents: {available_agents}"
+        )
 
     prompt = BASE_TERMINAL_PROMPT + PERSONA_PROMPTS[agent_name]
 
@@ -80,13 +78,16 @@ def load_prompt(agent_name: str, architecture: str = "swarm"):
 
     return prompt
 
+
 def get_available_agents():
 
     return list(PERSONA_PROMPTS.keys())
 
+
 def get_supported_architectures():
 
     return ["swarm", "hierarchical", "standalone"]
+
 
 def get_terminal_base_prompt():
 

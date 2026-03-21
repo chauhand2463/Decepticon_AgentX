@@ -1,15 +1,26 @@
 from langgraph.graph import START, MessagesState, StateGraph
 from langgraph.pregel import Pregel
-from typing_extensions import Any, Literal, Optional, Type, TypeVar, Union, get_args, get_origin
+from typing_extensions import (
+    Any,
+    Literal,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    get_args,
+    get_origin,
+)
 
 from src.utils.swarm.handoff import get_handoff_destinations
 
-class SwarmState(MessagesState):
 
+class SwarmState(MessagesState):
     active_agent: Optional[str]
+
 
 StateSchema = TypeVar("StateSchema", bound=SwarmState)
 StateSchemaType = Type[StateSchema]
+
 
 def _update_state_schema_agent_names(
     state_schema: StateSchemaType, agent_names: list[str]
@@ -19,7 +30,8 @@ def _update_state_schema_agent_names(
 
     is_str_type = active_agent_annotation is str
     is_optional_str = (
-        get_origin(active_agent_annotation) is Union and get_args(active_agent_annotation)[0] is str
+        get_origin(active_agent_annotation) is Union
+        and get_args(active_agent_annotation)[0] is str
     )
 
     if not (is_str_type or is_optional_str):
@@ -40,6 +52,7 @@ def _update_state_schema_agent_names(
 
     return updated_schema
 
+
 def add_active_agent_router(
     builder: StateGraph,
     *,
@@ -48,7 +61,9 @@ def add_active_agent_router(
 ) -> StateGraph:
 
     if "active_agent" not in builder.channels:
-        raise ValueError("Missing required key 'active_agent' in in builder's state_schema")
+        raise ValueError(
+            "Missing required key 'active_agent' in in builder's state_schema"
+        )
 
     if default_active_agent not in route_to:
         raise ValueError(
@@ -60,6 +75,7 @@ def add_active_agent_router(
 
     builder.add_conditional_edges(START, route_to_active_agent, path_map=route_to)
     return builder
+
 
 def create_swarm(
     agents: list[Pregel],

@@ -11,6 +11,9 @@ import json
 import os
 import sys
 
+# FIX: datetime was used in all tool call_tool implementations but was never imported
+from datetime import datetime
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from mcp.server import Server
@@ -24,6 +27,7 @@ app = Server("decepticon-nuclei")
 # ─────────────────────────────────────────────
 # HELPERS
 # ─────────────────────────────────────────────
+
 
 def run_command(cmd: str, timeout: int = 600) -> dict:
     """Run a shell command inside the attacker container."""
@@ -39,36 +43,46 @@ def parse_nuclei_jsonl(raw_output: str) -> list:
             continue
         try:
             entry = json.loads(line)
-            findings.append({
-                "template_id":   entry.get("template-id", ""),
-                "name":          entry.get("info", {}).get("name", ""),
-                "severity":      entry.get("info", {}).get("severity", "unknown").upper(),
-                "cvss_score":    entry.get("info", {}).get("classification", {}).get("cvss-score", None),
-                "cve":           entry.get("info", {}).get("classification", {}).get("cve-id", []),
-                "description":   entry.get("info", {}).get("description", ""),
-                "remediation":   entry.get("info", {}).get("remediation", ""),
-                "matched_at":    entry.get("matched-at", ""),
-                "host":          entry.get("host", ""),
-                "ip":            entry.get("ip", ""),
-                "tags":          entry.get("info", {}).get("tags", []),
-                "reference":     entry.get("info", {}).get("reference", []),
-                "extracted_results": entry.get("extracted-results", []),
-                "matcher_name":  entry.get("matcher-name", ""),
-                "timestamp":     entry.get("timestamp", "")
-            })
+            findings.append(
+                {
+                    "template_id": entry.get("template-id", ""),
+                    "name": entry.get("info", {}).get("name", ""),
+                    "severity": entry.get("info", {})
+                    .get("severity", "unknown")
+                    .upper(),
+                    "cvss_score": entry.get("info", {})
+                    .get("classification", {})
+                    .get("cvss-score", None),
+                    "cve": entry.get("info", {})
+                    .get("classification", {})
+                    .get("cve-id", []),
+                    "description": entry.get("info", {}).get("description", ""),
+                    "remediation": entry.get("info", {}).get("remediation", ""),
+                    "matched_at": entry.get("matched-at", ""),
+                    "host": entry.get("host", ""),
+                    "ip": entry.get("ip", ""),
+                    "tags": entry.get("info", {}).get("tags", []),
+                    "reference": entry.get("info", {}).get("reference", []),
+                    "extracted_results": entry.get("extracted-results", []),
+                    "matcher_name": entry.get("matcher-name", ""),
+                    "timestamp": entry.get("timestamp", ""),
+                }
+            )
         except json.JSONDecodeError:
-            # Non-JSON line (progress output etc.), skip
             continue
     return findings
 
 
 def severity_to_priority(severity: str) -> int:
-    return {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}.get(severity.upper(), 5)
+    return {"CRITICAL": 0, "HIGH": 1, "MEDIUM": 2, "LOW": 3, "INFO": 4}.get(
+        severity.upper(), 5
+    )
 
 
 # ─────────────────────────────────────────────
 # TOOL DEFINITIONS
 # ─────────────────────────────────────────────
+
 
 @app.list_tools()
 async def list_tools() -> list[types.Tool]:
@@ -86,17 +100,17 @@ async def list_tools() -> list[types.Tool]:
                 "properties": {
                     "target": {
                         "type": "string",
-                        "description": "Target URL or IP (e.g. http://192.168.1.1 or 192.168.1.1)"
+                        "description": "Target URL or IP (e.g. http://192.168.1.1 or 192.168.1.1)",
                     },
                     "severity": {
                         "type": "string",
                         "description": "Severity filter: critical,high,medium,low (default: critical,high)",
-                        "default": "critical,high"
+                        "default": "critical,high",
                     },
-                    "timeout": {"type": "integer", "default": 600}
+                    "timeout": {"type": "integer", "default": 600},
                 },
-                "required": ["target"]
-            }
+                "required": ["target"],
+            },
         ),
         types.Tool(
             name="nuclei_misconfig_scan",
@@ -108,11 +122,14 @@ async def list_tools() -> list[types.Tool]:
             inputSchema={
                 "type": "object",
                 "properties": {
-                    "target": {"type": "string", "description": "Target URL (e.g. http://target.com)"},
-                    "timeout": {"type": "integer", "default": 600}
+                    "target": {
+                        "type": "string",
+                        "description": "Target URL (e.g. http://target.com)",
+                    },
+                    "timeout": {"type": "integer", "default": 600},
                 },
-                "required": ["target"]
-            }
+                "required": ["target"],
+            },
         ),
         types.Tool(
             name="nuclei_network_scan",
@@ -125,10 +142,10 @@ async def list_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {
                     "target": {"type": "string", "description": "Target IP or IP:port"},
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["target"]
-            }
+                "required": ["target"],
+            },
         ),
         types.Tool(
             name="nuclei_tech_detect",
@@ -141,10 +158,10 @@ async def list_tools() -> list[types.Tool]:
                 "type": "object",
                 "properties": {
                     "target": {"type": "string", "description": "Target URL"},
-                    "timeout": {"type": "integer", "default": 120}
+                    "timeout": {"type": "integer", "default": 120},
                 },
-                "required": ["target"]
-            }
+                "required": ["target"],
+            },
         ),
         types.Tool(
             name="nuclei_full_scan",
@@ -160,13 +177,13 @@ async def list_tools() -> list[types.Tool]:
                     "severity": {
                         "type": "string",
                         "description": "Minimum severity (default: medium)",
-                        "default": "medium"
+                        "default": "medium",
                     },
-                    "timeout": {"type": "integer", "default": 900}
+                    "timeout": {"type": "integer", "default": 900},
                 },
-                "required": ["target"]
-            }
-        )
+                "required": ["target"],
+            },
+        ),
     ]
 
 
@@ -174,16 +191,19 @@ async def list_tools() -> list[types.Tool]:
 # TOOL IMPLEMENTATIONS
 # ─────────────────────────────────────────────
 
+
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
 
-    target  = arguments.get("target", "")
+    target = arguments.get("target", "")
     timeout = arguments.get("timeout", 600)
 
-    # ── CVE SCAN ────────────────────────────────────────────────────────
+    # ── CVE SCAN ───────────────────────────────────────────────────────
     if name == "nuclei_cve_scan":
         severity = arguments.get("severity", "critical,high")
-        cmd = f"nuclei -u {target} -t cves/ -severity {severity} -json -silent -no-color"
+        cmd = (
+            f"nuclei -u {target} -t cves/ -severity {severity} -json -silent -no-color"
+        )
         raw = run_command(cmd, timeout)
 
         findings = parse_nuclei_jsonl(raw["stdout"]) if raw["stdout"] else []
@@ -199,15 +219,15 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "summary": {
                 "total": len(findings),
                 "critical": sum(1 for f in findings if f["severity"] == "CRITICAL"),
-                "high":     sum(1 for f in findings if f["severity"] == "HIGH"),
-                "medium":   sum(1 for f in findings if f["severity"] == "MEDIUM"),
+                "high": sum(1 for f in findings if f["severity"] == "HIGH"),
+                "medium": sum(1 for f in findings if f["severity"] == "MEDIUM"),
             },
-            "stderr": raw["stderr"] if not raw["success"] else ""
+            "stderr": raw["stderr"] if not raw["success"] else "",
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── MISCONFIG SCAN ──────────────────────────────────────────────────
+    # ── MISCONFIG SCAN ─────────────────────────────────────────────────
     elif name == "nuclei_misconfig_scan":
         cmd = (
             f"nuclei -u {target} "
@@ -228,17 +248,21 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "summary": {
                 "total": len(findings),
                 "critical": sum(1 for f in findings if f["severity"] == "CRITICAL"),
-                "high":     sum(1 for f in findings if f["severity"] == "HIGH"),
-                "default_logins": [f for f in findings if "default-logins" in f.get("tags", [])]
+                "high": sum(1 for f in findings if f["severity"] == "HIGH"),
+                "default_logins": [
+                    f for f in findings if "default-logins" in f.get("tags", [])
+                ],
             },
-            "stderr": raw["stderr"] if not raw["success"] else ""
+            "stderr": raw["stderr"] if not raw["success"] else "",
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── NETWORK SCAN ────────────────────────────────────────────────────
+    # ── NETWORK SCAN ───────────────────────────────────────────────────
     elif name == "nuclei_network_scan":
-        cmd = f"nuclei -u {target} -t network/ -t default-logins/ -json -silent -no-color"
+        cmd = (
+            f"nuclei -u {target} -t network/ -t default-logins/ -json -silent -no-color"
+        )
         raw = run_command(cmd, timeout)
         findings = parse_nuclei_jsonl(raw["stdout"]) if raw["stdout"] else []
 
@@ -250,13 +274,15 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "timestamp": datetime.now().isoformat(),
             "findings": findings,
             "total": len(findings),
-            "default_credential_hits": [f for f in findings if "default-login" in f.get("template_id", "")],
-            "stderr": raw["stderr"] if not raw["success"] else ""
+            "default_credential_hits": [
+                f for f in findings if "default-login" in f.get("template_id", "")
+            ],
+            "stderr": raw["stderr"] if not raw["success"] else "",
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── TECH DETECT ─────────────────────────────────────────────────────
+    # ── TECH DETECT ────────────────────────────────────────────────────
     elif name == "nuclei_tech_detect":
         cmd = f"nuclei -u {target} -t technologies/ -json -silent -no-color"
         raw = run_command(cmd, timeout)
@@ -272,12 +298,16 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "timestamp": datetime.now().isoformat(),
             "technologies_detected": technologies,
             "raw_findings": findings,
-            "recommendation": f"Run nuclei_cve_scan with templates matching: {', '.join(technologies[:5])}" if technologies else "No technologies detected"
+            "recommendation": (
+                f"Run nuclei_cve_scan with templates matching: {', '.join(technologies[:5])}"
+                if technologies
+                else "No technologies detected"
+            ),
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── FULL SCAN ───────────────────────────────────────────────────────
+    # ── FULL SCAN ──────────────────────────────────────────────────────
     elif name == "nuclei_full_scan":
         severity = arguments.get("severity", "medium")
         cmd = (
@@ -301,28 +331,34 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "summary": {
                 "total": len(findings),
                 "critical": sum(1 for f in findings if f["severity"] == "CRITICAL"),
-                "high":     sum(1 for f in findings if f["severity"] == "HIGH"),
-                "medium":   sum(1 for f in findings if f["severity"] == "MEDIUM"),
-                "low":      sum(1 for f in findings if f["severity"] == "LOW"),
-                "info":     sum(1 for f in findings if f["severity"] == "INFO"),
+                "high": sum(1 for f in findings if f["severity"] == "HIGH"),
+                "medium": sum(1 for f in findings if f["severity"] == "MEDIUM"),
+                "low": sum(1 for f in findings if f["severity"] == "LOW"),
+                "info": sum(1 for f in findings if f["severity"] == "INFO"),
             },
             "top_findings": findings[:10],
-            "stderr": raw["stderr"] if not raw["success"] else ""
+            "stderr": raw["stderr"] if not raw["success"] else "",
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
     else:
-        return [types.TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
+        return [
+            types.TextContent(
+                type="text", text=json.dumps({"error": f"Unknown tool: {name}"})
+            )
+        ]
 
 
 # ─────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────
 
+
 async def main():
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
+
 
 if __name__ == "__main__":
     asyncio.run(main())

@@ -14,6 +14,10 @@
 
 <p align="center">
   <strong>Orchestrate a swarm of elite AI agents for autonomous red teaming, reconnaissance, and technical exploitation.</strong>
+  <br>
+  <br>
+  <img src="https://img.shields.io/badge/UI-Extreme_HUD-red?style=flat-square" alt="Extreme HUD">
+  <img src="https://img.shields.io/badge/Aesthetic-Vibe_Hacking-blueviolet?style=flat-square" alt="Vibe Hacking">
 </p>
 
 ---
@@ -47,6 +51,12 @@ Deep-native support for the **Model Context Protocol (MCP)**:
 - **Direct Control**: Terminal execution and filesystem manipulation via specialized servers.
 - **Live Intelligence**: Real-time web-search and OSINT gathering.
 - **Extensible**: Integrate custom tools (Nmap, Metasploit, etc.) as MCP servers.
+
+### 🎭 Extreme Level UI/UX
+Experience the mission through a high-end **Tactical HUD**:
+- **Glassmorphism**: Advanced blur and saturation effects for a premium feel.
+- **Interactive HUD**: Real-time agent status tracking with pulsing animations.
+- **Future-Dark Theme**: A custom-engineered "Extreme" theme inspired by modern sci-fi interfaces.
 
 ---
 
@@ -116,16 +126,22 @@ cp .env.example .env
 
 DECEPTICON offers two primary interfaces for mission control.
 
-### Option A: Tactical CLI (Terminal)
-Best for fast, low-latency operations and direct tool manipulation.
-```bash
-python frontend/cli/cli.py
+### Option A: Tactical Launcher (Recommended)
+The fastest way to access the Decepticon Command Center on Windows.
+```cmd
+START_DECEPTICON.bat
 ```
 
-### Option B: Command Web UI (Streamlit)
-A visual dashboard for monitoring swarm activity and reviewing detailed reports.
+### Option B: Tactical CLI (Terminal)
+Best for fast, low-latency operations and direct tool manipulation.
 ```bash
-streamlit run frontend/streamlit_app.py
+uv run python frontend/cli/cli.py
+```
+
+### Option C: Command Web UI (Streamlit)
+A visual dashboard with **Extreme Level** HUD and glassmorphic aesthetics.
+```bash
+uv run streamlit run frontend/streamlit_app.py
 ```
 
 ---

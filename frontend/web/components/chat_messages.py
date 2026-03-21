@@ -1,15 +1,12 @@
-
-
 import streamlit as st
 import re
 import time
-from datetime import datetime
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List
 from frontend.web.utils.constants import CSS_PATH_CHAT_UI, CSS_PATH_AGENT_STATUS
 from src.utils.agents import AgentManager
 
-class ChatMessagesComponent:
 
+class ChatMessagesComponent:
     def __init__(self):
 
         self._setup_styles()
@@ -20,7 +17,6 @@ class ChatMessagesComponent:
     def _setup_styles(self):
 
         try:
-
             with open(CSS_PATH_CHAT_UI, "r", encoding="utf-8") as f:
                 chat_css = f.read()
             st.html(f"<style>{chat_css}</style>")
@@ -35,7 +31,7 @@ class ChatMessagesComponent:
     def simulate_typing(self, text: str, placeholder, speed: float = 0.005):
 
         code_blocks = []
-        code_block_pattern = r'```.*?```'
+        code_block_pattern = r"```.*?```"
         for match in re.finditer(code_block_pattern, text, re.DOTALL):
             code_blocks.append((match.start(), match.end()))
 
@@ -44,7 +40,6 @@ class ChatMessagesComponent:
         chars_per_update = 5
 
         while i < len(text):
-
             code_block_to_add = None
 
             for start, end in code_blocks:
@@ -74,7 +69,9 @@ class ChatMessagesComponent:
                 placeholder.markdown(result)
                 time.sleep(speed)
 
-    def display_messages(self, structured_messages: List[Dict[str, Any]], container=None):
+    def display_messages(
+        self, structured_messages: List[Dict[str, Any]], container=None
+    ):
 
         if container is None:
             container = st
@@ -97,9 +94,14 @@ class ChatMessagesComponent:
         content = message.get("content", "")
 
         with container.chat_message("user"):
-            st.markdown(f'<div style="text-align: left;">{content}</div>', unsafe_allow_html=True)
+            st.markdown(
+                f'<div style="text-align: left;">{content}</div>',
+                unsafe_allow_html=True,
+            )
 
-    def display_agent_message(self, message: Dict[str, Any], container=None, streaming: bool = True):
+    def display_agent_message(
+        self, message: Dict[str, Any], container=None, streaming: bool = True
+    ):
 
         if container is None:
             container = st
@@ -122,6 +124,7 @@ class ChatMessagesComponent:
                 namespace_list = namespace
 
             from src.utils.message import get_agent_name
+
             agent_name_for_color = get_agent_name(namespace_list)
             if agent_name_for_color == "Unknown":
                 agent_name_for_color = display_name
@@ -134,10 +137,9 @@ class ChatMessagesComponent:
         st.session_state.message_counter += 1
 
         with container.chat_message("assistant", avatar=avatar):
-
             st.markdown(
                 f'<div class="agent-header {agent_class}"><strong style="color: {agent_color}">{display_name}</strong></div>',
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
             if content:
@@ -162,6 +164,7 @@ class ChatMessagesComponent:
 
         try:
             from src.utils.message import parse_tool_call
+
             tool_call_message = parse_tool_call(tool_call)
         except Exception as e:
             tool_call_message = f"Tool call error: {str(e)}"
@@ -180,6 +183,7 @@ class ChatMessagesComponent:
                 st.markdown(f"`{tool_call.get('id', 'N/A')}`")
                 if tool_args:
                     import json
+
                     st.code(json.dumps(tool_args, indent=2), language="json")
                 else:
                     st.markdown("`No arguments`")
@@ -198,14 +202,12 @@ class ChatMessagesComponent:
         st.session_state.message_counter += 1
 
         with container.chat_message("tool", avatar="🔧"):
-
             st.markdown(
                 f'<div class="agent-header {tool_class}"><strong style="color: {tool_color}">{tool_display_name}</strong></div>',
-                unsafe_allow_html=True
+                unsafe_allow_html=True,
             )
 
             if content:
-
                 if len(content) > 5000:
                     st.code(content[:5000] + "\n[Output truncated...]")
                     with st.expander("More.."):
@@ -213,7 +215,9 @@ class ChatMessagesComponent:
                 else:
                     st.code(content)
 
-    def show_processing_status(self, label: str = "Processing...", expanded: bool = True):
+    def show_processing_status(
+        self, label: str = "Processing...", expanded: bool = True
+    ):
 
         return st.status(label, expanded=expanded)
 

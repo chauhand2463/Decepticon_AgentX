@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import asyncio
 from datetime import datetime
@@ -8,8 +6,8 @@ from typing import Optional, Dict, Any
 from src.utils.logging.replay import get_replay_system
 from frontend.web.core.message_processor import MessageProcessor
 
-class ReplayManager:
 
+class ReplayManager:
     def __init__(self):
         self.replay_system = get_replay_system()
         self.message_processor = MessageProcessor()
@@ -18,7 +16,9 @@ class ReplayManager:
 
         return st.session_state.get("replay_mode", False)
 
-    def handle_replay_in_main_app(self, chat_area, agents_container, chat_ui, terminal_ui) -> bool:
+    def handle_replay_in_main_app(
+        self, chat_area, agents_container, chat_ui, terminal_ui
+    ) -> bool:
 
         if not self.is_replay_mode():
             return False
@@ -28,10 +28,12 @@ class ReplayManager:
             return False
 
         try:
-
             if self.replay_system.start_replay(replay_session_id):
-
-                asyncio.run(self._execute_replay_simplified(chat_area, agents_container, chat_ui, terminal_ui))
+                asyncio.run(
+                    self._execute_replay_simplified(
+                        chat_area, agents_container, chat_ui, terminal_ui
+                    )
+                )
 
                 self.replay_system.stop_replay()
 
@@ -47,7 +49,9 @@ class ReplayManager:
 
         return False
 
-    async def _execute_replay_simplified(self, chat_area, agents_container, chat_ui, terminal_ui):
+    async def _execute_replay_simplified(
+        self, chat_area, agents_container, chat_ui, terminal_ui
+    ):
 
         session = st.session_state.get("replay_session")
         if not session or not session.events:
@@ -55,22 +59,23 @@ class ReplayManager:
             return
 
         with st.status("🎬 Replaying session...", expanded=True) as status:
-
             replay_messages = []
             terminal_messages = []
             event_history = []
             agent_activity = {}
 
-            status.update(label=f"Processing {len(session.events)} events...", state="running")
+            status.update(
+                label=f"Processing {len(session.events)} events...", state="running"
+            )
 
             for i, event in enumerate(session.events):
                 try:
-
                     executor_event = self._convert_to_executor_event(event)
 
                     if executor_event:
-
-                        frontend_message = self.message_processor.process_cli_event(executor_event)
+                        frontend_message = self.message_processor.process_cli_event(
+                            executor_event
+                        )
 
                         if not self.message_processor.is_duplicate_message(
                             frontend_message, replay_messages
@@ -88,7 +93,10 @@ class ReplayManager:
                             agent_activity[agent_name] += 1
 
                     if (i + 1) % 10 == 0:
-                        status.update(label=f"Processed {i + 1}/{len(session.events)} events...", state="running")
+                        status.update(
+                            label=f"Processed {i + 1}/{len(session.events)} events...",
+                            state="running",
+                        )
 
                 except Exception as e:
                     print(f"Error processing event {i}: {e}")
@@ -100,7 +108,6 @@ class ReplayManager:
             st.session_state.event_history = event_history
 
             if replay_messages:
-
                 with chat_area:
                     for message in replay_messages:
                         message_type = message.get("type", "")
@@ -113,13 +120,14 @@ class ReplayManager:
 
             if terminal_ui and terminal_messages:
                 try:
-
                     terminal_ui.clear_terminal()
 
                     terminal_ui.process_structured_messages(terminal_messages)
 
                     if st.session_state.get("debug_mode", False):
-                        print(f"🎬 Replay: {len(terminal_messages)} terminal messages processed")
+                        print(
+                            f"🎬 Replay: {len(terminal_messages)} terminal messages processed"
+                        )
 
                 except Exception as term_error:
                     st.error(f"Terminal processing error during replay: {term_error}")
@@ -139,19 +147,16 @@ class ReplayManager:
                 st.session_state.completed_agents = completed_agents
                 st.session_state.active_agent = active_agent
 
-                if hasattr(chat_ui, 'display_agent_status'):
+                if hasattr(chat_ui, "display_agent_status"):
                     chat_ui.display_agent_status(
-                        agents_container,
-                        active_agent,
-                        None,
-                        completed_agents
+                        agents_container, active_agent, None, completed_agents
                     )
 
             st.session_state.replay_completed = True
 
             status.update(
                 label=f"✅ Replay Complete! Loaded {len(replay_messages)} messages, {len(terminal_messages)} terminal events, {len(agent_activity)} agents",
-                state="complete"
+                state="complete",
             )
 
     def _convert_to_executor_event(self, event) -> Optional[Dict[str, Any]]:
@@ -164,7 +169,7 @@ class ReplayManager:
                 "message_type": "user",
                 "agent_name": "User",
                 "content": event.content,
-                "timestamp": timestamp
+                "timestamp": timestamp,
             }
 
         elif event.event_type.value == "agent_response":
@@ -173,10 +178,10 @@ class ReplayManager:
                 "message_type": "ai",
                 "agent_name": event.agent_name or "Agent",
                 "content": event.content,
-                "timestamp": timestamp
+                "timestamp": timestamp,
             }
 
-            if hasattr(event, 'tool_calls') and event.tool_calls:
+            if hasattr(event, "tool_calls") and event.tool_calls:
                 executor_event["tool_calls"] = event.tool_calls
 
             return executor_event
@@ -188,7 +193,7 @@ class ReplayManager:
                 "agent_name": "Tool",
                 "tool_name": event.tool_name or "Unknown Tool",
                 "content": f"Command: {event.content}",
-                "timestamp": timestamp
+                "timestamp": timestamp,
             }
 
         elif event.event_type.value == "tool_output":
@@ -198,7 +203,7 @@ class ReplayManager:
                 "agent_name": "Tool",
                 "tool_name": event.tool_name or "Tool Output",
                 "content": event.content,
-                "timestamp": timestamp
+                "timestamp": timestamp,
             }
 
         return None

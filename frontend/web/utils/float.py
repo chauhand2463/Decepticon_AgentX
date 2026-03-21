@@ -1,9 +1,10 @@
-
 import streamlit as st
+
 
 def float_init():
     """Initializes the floating capability by injecting necessary CSS and JS."""
-    st.markdown("""
+    st.markdown(
+        """
         <style>
         .st-float-container {
             position: fixed !important;
@@ -30,7 +31,10 @@ def float_init():
         // Run once
         float_elements();
         </script>
-    """, unsafe_allow_html=True)
+    """,
+        unsafe_allow_html=True,
+    )
+
 
 def float_css_helper(
     width: str = "auto",
@@ -45,7 +49,7 @@ def float_css_helper(
     box_shadow: str = "none",
     z_index: str = "9999",
     padding: str = "0px",
-    transition: str = "none"
+    transition: str = "none",
 ) -> str:
     """Generates CSS string for a floating container."""
     styles = [
@@ -62,12 +66,16 @@ def float_css_helper(
         "display: flex !important",
         "flex-direction: column !important",
         "pointer-events: auto !important",
-        "overflow: hidden !important"
+        "overflow: hidden !important",
     ]
-    
-    if top: styles.append(f"top: {top} !important")
-    if bottom: styles.append(f"bottom: {bottom} !important")
-    if left: styles.append(f"left: {left} !important")
-    if right: styles.append(f"right: {right} !important")
-    
+
+    if top:
+        styles.append(f"top: {top} !important")
+    if bottom:
+        styles.append(f"bottom: {bottom} !important")
+    if left:
+        styles.append(f"left: {left} !important")
+    if right:
+        styles.append(f"right: {right} !important")
+
     return "; ".join(styles)

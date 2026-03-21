@@ -1,15 +1,16 @@
-
-
 import streamlit as st
 from pathlib import Path
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Optional, Callable
+
 
 class ThemeUIComponent:
-
     def __init__(self):
 
         self.base_path = Path(__file__).parent
-        while not (self.base_path / "pyproject.toml").exists() and self.base_path.parent != self.base_path:
+        while (
+            not (self.base_path / "pyproject.toml").exists()
+            and self.base_path.parent != self.base_path
+        ):
             self.base_path = self.base_path.parent
 
         self.css_dir = self.base_path / "frontend" / "static" / "css"
@@ -28,38 +29,41 @@ class ThemeUIComponent:
     def apply_theme_css(self, theme: str = "dark"):
 
         css = self.load_theme_css(theme)
+        if theme == "extreme":
+            css += self.load_theme_css("extreme")  # Load specifically if named extreme
 
         if css:
-
-            colors = self._get_theme_colors(theme)
-
+            colors = self._get_theme_colors("dark" if theme == "extreme" else theme)
             st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
 
             # Inject HUD Design Tokens
             tokens = {
-                "hud_primary": colors['active_border'],
-                "hud_bg": colors['agent_bg'],
-                "hud_border": colors['agent_border'],
-                "hud_text": colors['agent_text'],
-                "chat_message_bg": colors['message_bg'],
-                "chat_message_border": colors['chat_border'],
-                "chat_message_text": colors['sidebar_text'],
+                "hud_primary": colors["active_border"],
+                "hud_bg": colors["agent_bg"],
+                "hud_border": colors["agent_border"],
+                "hud_text": colors["agent_text"],
+                "chat_message_bg": colors["message_bg"],
+                "chat_message_border": colors["chat_border"],
+                "chat_message_text": colors["sidebar_text"],
                 "chat_message_user_bg": "rgba(30, 41, 59, 0.4)",
                 "chat_message_user_border": "rgba(148, 163, 184, 0.2)",
                 "chat_message_user_text": "#f8fafc",
-                "chat_message_assistant_bg": colors['message_bg'],
-                "chat_message_assistant_border": colors['chat_border'],
-                "chat_message_assistant_text": colors['sidebar_text'],
-                "chat_message_active_border": colors['active_border'],
-                "chat_message_active_shadow": colors['active_shadow'],
-                "chat_message_completed_border": colors['completed_border'],
+                "chat_message_assistant_bg": colors["message_bg"],
+                "chat_message_assistant_border": colors["chat_border"],
+                "chat_message_assistant_text": colors["sidebar_text"],
+                "chat_message_active_border": colors["active_border"],
+                "chat_message_active_shadow": colors["active_shadow"],
+                "chat_message_completed_border": colors["completed_border"],
                 "chat_message_completed_shadow": "none",
                 "chat_message_error_border": "#ef4444",
                 "chat_message_error_shadow": "rgba(239, 68, 68, 0.2)",
                 "chat_message_warning_border": "#f59e0b",
-                "chat_message_warning_shadow": "rgba(245, 158, 11, 0.2)"
+                "chat_message_warning_shadow": "rgba(245, 158, 11, 0.2)",
             }
             self._apply_hud_design_tokens(tokens)
+
+            if theme == "extreme":
+                self.inject_advanced_background()
 
             override_css = self._generate_theme_overrides(colors, theme)
             st.markdown(override_css, unsafe_allow_html=True)
@@ -72,29 +76,29 @@ class ThemeUIComponent:
             return {
                 "sidebar_bg": "#0B0B12",
                 "sidebar_text": "#FAFAFA",
-                "toggle_bg": "#1e293b", # Slate-800
+                "toggle_bg": "#1e293b",  # Slate-800
                 "toggle_text": "#FAFAFA",
                 "toggle_border": "rgba(255, 255, 255, 0.1)",
                 "button_bg": "#1e293b",
                 "button_text": "#FAFAFA",
-                "button_border": "#334155", # Slate-700
+                "button_border": "#334155",  # Slate-700
                 "button_hover_bg": "#334155",
                 "button_hover_text": "#FFFFFF",
-                "button_active_bg": "#ef4444", # Danger Red
+                "button_active_bg": "#ef4444",  # Danger Red
                 "button_active_text": "#FFFFFF",
-                "agent_bg": "rgba(15, 23, 42, 0.8)", # Slate-900
+                "agent_bg": "rgba(15, 23, 42, 0.8)",  # Slate-900
                 "agent_border": "rgba(148, 163, 184, 0.2)",
-                "agent_text": "#94a3b8", # Slate-400
-                "active_bg": "rgba(16, 185, 129, 0.1)", # Emerald
-                "active_border": "#10b981", # Emerald
+                "agent_text": "#94a3b8",  # Slate-400
+                "active_bg": "rgba(16, 185, 129, 0.1)",  # Emerald
+                "active_border": "#10b981",  # Emerald
                 "active_shadow": "rgba(16, 185, 129, 0.4)",
                 "active_text_shadow": "rgba(16, 185, 129, 0.5)",
-                "completed_bg": "rgba(30, 41, 59, 0.5)", # Slate-800
-                "completed_border": "#475569", # Slate-600
-                "header_text": "#f8fafc", # Slate-50
+                "completed_bg": "rgba(30, 41, 59, 0.5)",  # Slate-800
+                "completed_border": "#475569",  # Slate-600
+                "header_text": "#f8fafc",  # Slate-50
                 "header_border": "rgba(255, 255, 255, 0.05)",
                 "message_bg": "rgba(15, 23, 42, 0.6)",
-                "terminal_bg": "#020617", # Slate-950
+                "terminal_bg": "#020617",  # Slate-950
                 "terminal_text": "#e2e8f0",
                 "terminal_header_bg": "#0f172a",
                 "terminal_header_text": "#94a3b8",
@@ -106,7 +110,7 @@ class ThemeUIComponent:
                 "chat_container_bg": "#020617",
                 "chat_input_bg": "#0f172a",
                 "chat_input_text": "#f8fafc",
-                "chat_border": "#1e293b"
+                "chat_border": "#1e293b",
             }
         else:
             return {
@@ -147,8 +151,42 @@ class ThemeUIComponent:
                 "chat_container_bg": "#FFFFFF",
                 "chat_input_bg": "#F0F2F6",
                 "chat_input_text": "#31333F",
-                "chat_border": "#DCDCDC"
+                "chat_border": "#DCDCDC",
             }
+
+    def inject_advanced_background(self):
+        """
+        Injects a high-end futuristic background with Particles.js and custom HUD overlays.
+        """
+        particles_js = """
+        <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+        <div id="particles-js" style="position: fixed; width: 100vw; height: 100vh; top: 0; left: 0; z-index: -1; background: #020617;"></div>
+        <script>
+            particlesJS('particles-js', {
+                "particles": {
+                    "number": { "value": 100, "density": { "enable": true, "value_area": 800 } },
+                    "color": { "value": "#38bdf8" },
+                    "shape": { "type": "circle" },
+                    "opacity": { "value": 0.3, "random": true },
+                    "size": { "value": 2, "random": true },
+                    "line_linked": { "enable": true, "distance": 150, "color": "#38bdf8", "opacity": 0.2, "width": 1 },
+                    "move": { "enable": true, "speed": 1.5, "direction": "none", "random": true, "straight": false, "out_mode": "out", "bounce": false }
+                },
+                "interactivity": {
+                    "detect_on": "canvas",
+                    "events": { "onhover": { "enable": true, "mode": "grab" }, "onclick": { "enable": true, "mode": "push" }, "resize": true },
+                    "modes": { "grab": { "distance": 140, "line_linked": { "opacity": 0.5 } }, "push": { "particles_nb": 4 } }
+                },
+                "retina_detect": true
+            });
+        </script>
+        <style>
+            #particles-js canvas { display: block; vertical-align: bottom; }
+            .stApp { background: transparent !important; }
+            [data-testid="stHeader"] { background: transparent !important; }
+        </style>
+        """
+        st.components.v1.html(particles_js, height=0, width=0)
 
     def _generate_theme_overrides(self, colors: Dict[str, str], theme: str) -> str:
         """
@@ -160,10 +198,10 @@ class ThemeUIComponent:
         return f"""
         <style>
         :root {{
-            --hud-primary: {colors['active_border']};
-            --hud-bg: {colors['agent_bg']};
-            --hud-border: {colors['agent_border']};
-            --hud-text: {colors['agent_text']};
+            --hud-primary: {colors["active_border"]};
+            --hud-bg: {colors["agent_bg"]};
+            --hud-border: {colors["agent_border"]};
+            --hud-text: {colors["agent_text"]};
         }}
 
         /* Staggered Reveal Animation */
@@ -224,29 +262,29 @@ class ThemeUIComponent:
         <style>
         :root {{
             /* General HUD */
-            --hud-primary: {colors['hud_primary']};
-            --hud-bg: {colors['hud_bg']};
-            --hud-border: {colors['hud_border']};
-            --hud-text: {colors['hud_text']};
+            --hud-primary: {colors["hud_primary"]};
+            --hud-bg: {colors["hud_bg"]};
+            --hud-border: {colors["hud_border"]};
+            --hud-text: {colors["hud_text"]};
 
             /* Chat Messages */
-            --chat-message-bg: {colors['chat_message_bg']};
-            --chat-message-border: {colors['chat_message_border']};
-            --chat-message-text: {colors['chat_message_text']};
-            --chat-message-user-bg: {colors['chat_message_user_bg']};
-            --chat-message-user-border: {colors['chat_message_user_border']};
-            --chat-message-user-text: {colors['chat_message_user_text']};
-            --chat-message-assistant-bg: {colors['chat_message_assistant_bg']};
-            --chat-message-assistant-border: {colors['chat_message_assistant_border']};
-            --chat-message-assistant-text: {colors['chat_message_assistant_text']};
-            --chat-message-active-border: {colors['chat_message_active_border']};
-            --chat-message-active-shadow: {colors['chat_message_active_shadow']};
-            --chat-message-completed-border: {colors['chat_message_completed_border']};
-            --chat-message-completed-shadow: {colors['chat_message_completed_shadow']};
-            --chat-message-error-border: {colors['chat_message_error_border']};
-            --chat-message-error-shadow: {colors['chat_message_error_shadow']};
-            --chat-message-warning-border: {colors['chat_message_warning_border']};
-            --chat-message-warning-shadow: {colors['chat_message_warning_shadow']};
+            --chat-message-bg: {colors["chat_message_bg"]};
+            --chat-message-border: {colors["chat_message_border"]};
+            --chat-message-text: {colors["chat_message_text"]};
+            --chat-message-user-bg: {colors["chat_message_user_bg"]};
+            --chat-message-user-border: {colors["chat_message_user_border"]};
+            --chat-message-user-text: {colors["chat_message_user_text"]};
+            --chat-message-assistant-bg: {colors["chat_message_assistant_bg"]};
+            --chat-message-assistant-border: {colors["chat_message_assistant_border"]};
+            --chat-message-assistant-text: {colors["chat_message_assistant_text"]};
+            --chat-message-active-border: {colors["chat_message_active_border"]};
+            --chat-message-active-shadow: {colors["chat_message_active_shadow"]};
+            --chat-message-completed-border: {colors["chat_message_completed_border"]};
+            --chat-message-completed-shadow: {colors["chat_message_completed_shadow"]};
+            --chat-message-error-border: {colors["chat_message_error_border"]};
+            --chat-message-error-shadow: {colors["chat_message_error_shadow"]};
+            --chat-message-warning-border: {colors["chat_message_warning_border"]};
+            --chat-message-warning-shadow: {colors["chat_message_warning_shadow"]};
         }}
         </style>
         """
@@ -254,11 +292,7 @@ class ThemeUIComponent:
 
     def _load_additional_css_files(self):
 
-        css_files = [
-            "layout.css",
-            "model_info.css",
-            "input_fix.css"
-        ]
+        css_files = ["layout.css", "model_info.css", "input_fix.css"]
 
         for css_file in css_files:
             css_path = self.css_dir / css_file
@@ -274,7 +308,7 @@ class ThemeUIComponent:
         self,
         container=None,
         current_theme: str = "dark",
-        callback: Optional[Callable] = None
+        callback: Optional[Callable] = None,
     ) -> bool:
 
         if container is None:
@@ -283,11 +317,7 @@ class ThemeUIComponent:
         theme_label = "🌙 Dark" if current_theme == "dark" else "☀️ Light"
         is_dark = current_theme == "dark"
 
-        toggle_value = container.toggle(
-            theme_label,
-            value=is_dark,
-            key="theme_toggle"
-        )
+        toggle_value = container.toggle(theme_label, value=is_dark, key="theme_toggle")
 
         if toggle_value != is_dark:
             new_theme = "dark" if toggle_value else "light"
@@ -301,16 +331,14 @@ class ThemeUIComponent:
 
     def show_theme_preview(self, theme: str = "dark"):
 
-        colors = self._get_theme_colors(theme)
+        self._get_theme_colors(theme)
 
         st.markdown(f"### Theme Preview: {theme.capitalize()}", unsafe_allow_html=True)
 
     def apply_page_theme(self, theme: str = "dark"):
 
         st.set_page_config(
-            page_title="DECEPTICON",
-            page_icon="assets/logo.png",
-            layout="wide"
+            page_title="DECEPTICON", page_icon="assets/logo.png", layout="wide"
         )
 
         self.apply_theme_css(theme)

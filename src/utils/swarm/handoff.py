@@ -10,9 +10,11 @@ from typing_extensions import Annotated
 WHITESPACE_RE = re.compile(r"\s+")
 METADATA_KEY_HANDOFF_DESTINATION = "__handoff_destination"
 
+
 def _normalize_agent_name(agent_name: str) -> str:
 
     return WHITESPACE_RE.sub("_", agent_name.strip()).lower()
+
 
 def create_handoff_tool(
     *, agent_name: str, name: str | None = None, description: str | None = None
@@ -37,13 +39,19 @@ def create_handoff_tool(
         return Command(
             goto=agent_name,
             graph=Command.PARENT,
-            update={"messages": state["messages"] + [tool_message], "active_agent": agent_name},
+            update={
+                "messages": state["messages"] + [tool_message],
+                "active_agent": agent_name,
+            },
         )
 
     handoff_to_agent.metadata = {METADATA_KEY_HANDOFF_DESTINATION: agent_name}
     return handoff_to_agent
 
-def get_handoff_destinations(agent: CompiledStateGraph, tool_node_name: str = "tools") -> list[str]:
+
+def get_handoff_destinations(
+    agent: CompiledStateGraph, tool_node_name: str = "tools"
+) -> list[str]:
 
     nodes = agent.get_graph().nodes
     if tool_node_name not in nodes:
@@ -57,5 +65,6 @@ def get_handoff_destinations(agent: CompiledStateGraph, tool_node_name: str = "t
     return [
         tool.metadata[METADATA_KEY_HANDOFF_DESTINATION]
         for tool in tools
-        if tool.metadata is not None and METADATA_KEY_HANDOFF_DESTINATION in tool.metadata
+        if tool.metadata is not None
+        and METADATA_KEY_HANDOFF_DESTINATION in tool.metadata
     ]

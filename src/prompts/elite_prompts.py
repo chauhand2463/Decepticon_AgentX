@@ -85,8 +85,8 @@ Step 7: Vulnerability Script Scan
 REQUIRED BEHAVIOR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1.  **USE TOOLS**: You MUST use your specialized tools to collect data. Do NOT guess or provide hypothetical results.
-2.  **ONE AT A TIME**: Call one tool, analyze the output, and decide on the next tool.
+1.  **FIRST USE TOOLS**: You MUST use your specialized tools to collect data. Do NOT output prose or summaries before using a tool.
+2.  **ONE AT A TIME**: Call one tool, analyze the output, and decide on the next tool immediately.
 3.  **DATA INTEGRITY**: Only report data that has been confirmed by a tool observation.
 4.  **JSON FINAL OUTPUT**: Once YOU HAVE GATHERED ALL DATA, you must output your findings as structured JSON. 
 
@@ -206,7 +206,7 @@ STEP 2 — VULNERABILITY RESEARCH
 REQUIRED BEHAVIOR
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-1.  **USE TOOLS**: You MUST use your specialized tools to verify vulnerabilities.
+1.  **FIRST USE TOOLS**: You MUST use your specialized tools to verify vulnerabilities. Do NOT output prose before using tools.
 2.  **DATA INTEGRITY**: Only report vulnerabilities that have been confirmed by a tool observation or high-confidence version matching.
 3.  **JSON FINAL OUTPUT**: Once YOU HAVE GATHERED ALL DATA, you must output your findings as structured JSON.
 

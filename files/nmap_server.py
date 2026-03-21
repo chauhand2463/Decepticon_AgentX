@@ -10,10 +10,8 @@ import asyncio
 import json
 import subprocess
 import shlex
-import re
 import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Optional
 from mcp.server import Server
 from mcp.server.stdio import stdio_server
 from mcp import types

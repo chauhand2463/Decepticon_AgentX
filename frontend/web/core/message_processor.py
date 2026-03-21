@@ -1,18 +1,18 @@
-
-
 from datetime import datetime
 from typing import Dict, Any, List
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+)
 
 from src.utils.message import parse_tool_name, extract_tool_calls
 
 from src.utils.agents import AgentManager
 
-class MessageProcessor:
 
+class MessageProcessor:
     def __init__(self):
 
         self.default_avatar = "🤖"
@@ -47,7 +47,7 @@ class MessageProcessor:
         avatar: str,
         content: str,
         raw_message: Any,
-        event_data: Dict[str, Any]
+        event_data: Dict[str, Any],
     ) -> Dict[str, Any]:
 
         message = {
@@ -56,7 +56,7 @@ class MessageProcessor:
             "display_name": display_name,
             "avatar": avatar,
             "content": content,
-            "id": f"ai_{agent_name.lower()}_{hash(content[:100])}_{datetime.now().timestamp()}"
+            "id": f"ai_{agent_name.lower()}_{hash(content[:100])}_{datetime.now().timestamp()}",
         }
 
         tool_calls = extract_tool_calls(raw_message, event_data)
@@ -65,17 +65,21 @@ class MessageProcessor:
 
         return message
 
-    def _create_tool_message(self, event_data: Dict[str, Any], content: str) -> Dict[str, Any]:
+    def _create_tool_message(
+        self, event_data: Dict[str, Any], content: str
+    ) -> Dict[str, Any]:
 
         tool_name = event_data.get("tool_name", "Unknown Tool")
-        tool_display_name = event_data.get("tool_display_name", parse_tool_name(tool_name))
+        tool_display_name = event_data.get(
+            "tool_display_name", parse_tool_name(tool_name)
+        )
 
         return {
             "type": "tool",
             "tool_name": tool_name,
             "tool_display_name": tool_display_name,
             "content": content,
-            "id": f"tool_{tool_name}_{hash(content[:100])}_{datetime.now().timestamp()}"
+            "id": f"tool_{tool_name}_{hash(content[:100])}_{datetime.now().timestamp()}",
         }
 
     def _create_user_message(self, content: str) -> Dict[str, Any]:
@@ -83,16 +87,12 @@ class MessageProcessor:
         return {
             "type": "user",
             "content": content,
-            "id": f"user_{hash(content)}_{datetime.now().timestamp()}"
+            "id": f"user_{hash(content)}_{datetime.now().timestamp()}",
         }
 
     def extract_agent_status(self, events: List[Dict[str, Any]]) -> Dict[str, Any]:
 
-        status = {
-            "active_agent": None,
-            "completed_agents": [],
-            "current_step": 0
-        }
+        status = {"active_agent": None, "completed_agents": [], "current_step": 0}
 
         for event in reversed(events):
             if event.get("type") == "message" and event.get("message_type") == "ai":
@@ -106,9 +106,7 @@ class MessageProcessor:
         return status
 
     def is_duplicate_message(
-        self,
-        new_message: Dict[str, Any],
-        existing_messages: List[Dict[str, Any]]
+        self, new_message: Dict[str, Any], existing_messages: List[Dict[str, Any]]
     ) -> bool:
 
         new_id = new_message.get("id")
@@ -123,14 +121,18 @@ class MessageProcessor:
         new_content = new_message.get("content", "")
 
         for msg in existing_messages:
-            if (msg.get("agent_id") == new_agent and
-                msg.get("type") == new_message.get("type") and
-                msg.get("content") == new_content):
+            if (
+                msg.get("agent_id") == new_agent
+                and msg.get("type") == new_message.get("type")
+                and msg.get("content") == new_content
+            ):
                 return True
 
         return False
 
+
 _message_processor = None
+
 
 def get_message_processor() -> MessageProcessor:
 

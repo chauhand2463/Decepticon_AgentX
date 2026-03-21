@@ -1,10 +1,6 @@
-
-
 import streamlit as st
-import asyncio
 import os
 import sys
-import time
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
@@ -37,6 +33,7 @@ terminal_ui = TerminalUIComponent()
 sidebar = SidebarComponent()
 mission_hud = MissionHUDComponent()
 
+
 def main():
 
     try:
@@ -51,7 +48,7 @@ def main():
         _show_model_required_message()
         return
 
-    current_theme = "dark" if st.session_state.get('dark_mode', True) else "light"
+    current_theme = st.session_state.get("theme", "extreme") if st.session_state.get("dark_mode", True) else "light"
     theme_ui.apply_theme_css(current_theme)
     float_init()
     terminal_ui.apply_terminal_css()
@@ -72,11 +69,13 @@ def main():
 
     _display_main_interface()
 
+
 def _show_model_required_message():
 
     st.warning("⚠️ Please select a model first")
     if st.button("Go to Model Selection", type="primary"):
         st.switch_page("streamlit_app.py")
+
 
 def _setup_sidebar():
 
@@ -84,13 +83,13 @@ def _setup_sidebar():
         "on_change_model": lambda: st.switch_page("streamlit_app.py"),
         "on_chat_history": lambda: st.switch_page("pages/02_Chat_History.py"),
         "on_new_chat": _create_new_chat,
-        "on_debug_mode_change": app_state.set_debug_mode
+        "on_debug_mode_change": app_state.set_debug_mode,
     }
 
     try:
-        current_model = st.session_state.get('current_model')
-        active_agent = st.session_state.get('active_agent')
-        completed_agents = st.session_state.get('completed_agents', [])
+        current_model = st.session_state.get("current_model")
+        active_agent = st.session_state.get("active_agent")
+        completed_agents = st.session_state.get("completed_agents", [])
         session_stats = app_state.get_session_stats()
         debug_info = app_state.get_debug_info()
     except Exception as e:
@@ -99,8 +98,20 @@ def _setup_sidebar():
         current_model = None
         active_agent = None
         completed_agents = []
-        session_stats = {"messages_count": 0, "events_count": 0, "steps_count": 0, "elapsed_time": 0, "active_agent": None, "completed_agents_count": 0}
-        debug_info = {"user_id": "Error", "thread_id": "Error", "executor_ready": False, "workflow_running": False}
+        session_stats = {
+            "messages_count": 0,
+            "events_count": 0,
+            "steps_count": 0,
+            "elapsed_time": 0,
+            "active_agent": None,
+            "completed_agents_count": 0,
+        }
+        debug_info = {
+            "user_id": "Error",
+            "thread_id": "Error",
+            "executor_ready": False,
+            "workflow_running": False,
+        }
 
     sidebar.render_complete_sidebar(
         model_info=current_model,
@@ -108,8 +119,9 @@ def _setup_sidebar():
         completed_agents=completed_agents,
         session_stats=session_stats,
         debug_info=debug_info,
-        callbacks=callbacks
+        callbacks=callbacks,
     )
+
 
 def _render_mission_hud():
     """
@@ -117,31 +129,32 @@ def _render_mission_hud():
     """
     # Define the mission sequence matching the MITRE-inspired swarm HUD
     agents_sequence = [
-        "Planner", 
-        "Reconnaissance", 
-        "Initial_Access", 
-        "Execution", 
-        "Persistence", 
-        "Privilege_Escalation", 
-        "Defense_Evasion", 
-        "Summary"
+        "Planner",
+        "Reconnaissance",
+        "Initial_Access",
+        "Execution",
+        "Persistence",
+        "Privilege_Escalation",
+        "Defense_Evasion",
+        "Summary",
     ]
-    active_agent = st.session_state.get('active_agent')
-    completed_agents = st.session_state.get('completed_agents', [])
+    active_agent = st.session_state.get("active_agent")
+    completed_agents = st.session_state.get("completed_agents", [])
     hud_states = []
-    
+
     for name in agents_sequence:
         status = "waiting"
         if name == active_agent:
             status = "active"
         elif name in completed_agents:
             status = "completed"
-        
+
         hud_states.append({"name": name, "status": status})
-    
+
     st.markdown('<div class="hud-wrapper">', unsafe_allow_html=True)
     mission_hud.render(hud_states)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 def _display_main_interface():
 
@@ -155,8 +168,8 @@ def _display_main_interface():
 
     with chat_container:
         messages_area = st.container()
-        if not st.session_state.get('workflow_running', False):
-            structured_messages = st.session_state.get('structured_messages', [])
+        if not st.session_state.get("workflow_running", False):
+            structured_messages = st.session_state.get("structured_messages", [])
             chat_messages.display_messages(structured_messages, messages_area)
 
     _handle_terminal_toggle()
@@ -165,15 +178,18 @@ def _display_main_interface():
 
     _handle_user_input(messages_area)
 
+
 def _handle_terminal_toggle():
 
-    toggle_clicked = terminal_ui.create_floating_toggle_button(st.session_state.terminal_visible)
+    toggle_clicked = terminal_ui.create_floating_toggle_button(
+        st.session_state.terminal_visible
+    )
 
     if toggle_clicked:
-
         st.session_state.terminal_visible = not st.session_state.terminal_visible
 
         st.rerun()
+
 
 def _render_floating_terminal():
 
@@ -181,17 +197,22 @@ def _render_floating_terminal():
         terminal_history = terminal_processor.get_terminal_history()
         terminal_ui.create_floating_terminal(terminal_history)
 
+
 def _handle_user_input(messages_area):
 
     user_input = st.chat_input("Type your red team request here...")
 
-    if user_input and not st.session_state.get('workflow_running', False):
+    if user_input and not st.session_state.get("workflow_running", False):
 
         async def execute_workflow():
 
             validation_result = workflow_handler.validate_execution_state()
             if not validation_result["can_execute"]:
-                st.error(validation_result["errors"][0] if validation_result["errors"] else "Cannot execute workflow")
+                st.error(
+                    validation_result["errors"][0]
+                    if validation_result["errors"]
+                    else "Cannot execute workflow"
+                )
                 return
 
             user_message = workflow_handler.prepare_user_input(user_input)
@@ -200,10 +221,12 @@ def _handle_user_input(messages_area):
                 chat_messages.display_user_message(user_message)
 
             ui_callbacks = {
-                "on_message_ready": lambda msg: _display_message_callback(msg, messages_area),
+                "on_message_ready": lambda msg: _display_message_callback(
+                    msg, messages_area
+                ),
                 "on_terminal_message": _terminal_message_callback,
                 "on_workflow_complete": lambda: None,
-                "on_error": lambda error: st.error(f"Workflow error: {error}")
+                "on_error": lambda error: st.error(f"Workflow error: {error}"),
             }
 
             result = await workflow_handler.execute_workflow_logic(
@@ -211,14 +234,15 @@ def _handle_user_input(messages_area):
             )
 
             if result["success"]:
-
                 pass
             else:
                 if result["error_message"]:
                     st.error(result["error_message"])
 
         from src.utils.async_runner import run_async
+
         run_async(execute_workflow())
+
 
 def _display_message_callback(message, messages_area):
 
@@ -229,21 +253,26 @@ def _display_message_callback(message, messages_area):
         elif message_type == "tool":
             chat_messages.display_tool_message(message)
 
+
 def _terminal_message_callback(tool_name, content):
 
     pass
 
+
 def _create_new_chat():
 
     try:
-        conversation_id = app_state.create_new_conversation()
+        app_state.create_new_conversation()
         executor_manager.reset()
 
-        current_model = st.session_state.get('current_model')
+        current_model = st.session_state.get("current_model")
         if current_model:
+
             async def reinitialize():
                 await executor_manager.initialize_with_model(current_model)
+
             from src.utils.async_runner import run_async
+
             run_async(reinitialize())
 
         terminal_processor.clear_terminal_state()
@@ -252,6 +281,7 @@ def _create_new_chat():
 
     except Exception as e:
         st.error(f"Failed to create new chat: {str(e)}")
+
 
 def _handle_replay_mode(replay_manager):
 
@@ -274,7 +304,6 @@ def _handle_replay_mode(replay_manager):
         )
 
         if not replay_handled:
-
             st.error("재현에 실패했습니다. 세션 데이터를 찾을 수 없습니다.")
 
     _handle_terminal_toggle()
@@ -286,11 +315,11 @@ def _handle_replay_mode(replay_manager):
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("✨ Start New Chat", use_container_width=True, type="primary"):
-
                 for key in ["replay_mode", "replay_session_id", "replay_completed"]:
                     st.session_state.pop(key, None)
 
                 _create_new_chat()
+
 
 if __name__ == "__main__":
     main()

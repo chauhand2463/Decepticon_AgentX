@@ -1,30 +1,22 @@
-
-
 import streamlit as st
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, Optional
 from frontend.web.utils.constants import (
     SESSION_KEY_CURRENT_MODEL,
     SESSION_KEY_EXECUTOR_READY,
-    API_KEYS,
-    PROVIDERS
+    PROVIDERS,
 )
+
 
 def check_model_required() -> bool:
 
     return bool(st.session_state.get(SESSION_KEY_CURRENT_MODEL))
 
+
 def validate_session_state() -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": [],
-        "warnings": []
-    }
+    validation_result = {"valid": True, "errors": [], "warnings": []}
 
-    required_keys = [
-        SESSION_KEY_EXECUTOR_READY,
-        SESSION_KEY_CURRENT_MODEL
-    ]
+    required_keys = [SESSION_KEY_EXECUTOR_READY, SESSION_KEY_CURRENT_MODEL]
 
     for key in required_keys:
         if key not in st.session_state:
@@ -36,13 +28,10 @@ def validate_session_state() -> Dict[str, Any]:
 
     return validation_result
 
+
 def validate_user_input(user_input: str) -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": [],
-        "cleaned_input": ""
-    }
+    validation_result = {"valid": True, "errors": [], "cleaned_input": ""}
 
     if not user_input:
         validation_result["errors"].append("Empty input")
@@ -64,12 +53,10 @@ def validate_user_input(user_input: str) -> Dict[str, Any]:
     validation_result["cleaned_input"] = cleaned
     return validation_result
 
+
 def validate_model_info(model_info: Dict[str, Any]) -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": []
-    }
+    validation_result = {"valid": True, "errors": []}
 
     if not isinstance(model_info, dict):
         validation_result["errors"].append("Model info must be a dictionary")
@@ -96,12 +83,10 @@ def validate_model_info(model_info: Dict[str, Any]) -> Dict[str, Any]:
 
     return validation_result
 
+
 def validate_message_format(message: Dict[str, Any]) -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": []
-    }
+    validation_result = {"valid": True, "errors": []}
 
     if not isinstance(message, dict):
         validation_result["errors"].append("Message must be a dictionary")
@@ -122,12 +107,10 @@ def validate_message_format(message: Dict[str, Any]) -> Dict[str, Any]:
 
     return validation_result
 
+
 def validate_terminal_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": []
-    }
+    validation_result = {"valid": True, "errors": []}
 
     if not isinstance(entry, dict):
         validation_result["errors"].append("Terminal entry must be a dictionary")
@@ -143,17 +126,19 @@ def validate_terminal_entry(entry: Dict[str, Any]) -> Dict[str, Any]:
 
     valid_types = ["command", "output"]
     if "type" in entry and entry["type"] not in valid_types:
-        validation_result["errors"].append(f"Invalid terminal entry type: {entry['type']}")
+        validation_result["errors"].append(
+            f"Invalid terminal entry type: {entry['type']}"
+        )
         validation_result["valid"] = False
 
     return validation_result
 
-def validate_file_path(file_path: str, required_extension: Optional[str] = None) -> Dict[str, Any]:
 
-    validation_result = {
-        "valid": True,
-        "errors": []
-    }
+def validate_file_path(
+    file_path: str, required_extension: Optional[str] = None
+) -> Dict[str, Any]:
+
+    validation_result = {"valid": True, "errors": []}
 
     if not file_path:
         validation_result["errors"].append("Empty file path")
@@ -162,7 +147,9 @@ def validate_file_path(file_path: str, required_extension: Optional[str] = None)
 
     if required_extension:
         if not file_path.endswith(required_extension):
-            validation_result["errors"].append(f"File must have {required_extension} extension")
+            validation_result["errors"].append(
+                f"File must have {required_extension} extension"
+            )
             validation_result["valid"] = False
 
     if ".." in file_path:
@@ -170,6 +157,7 @@ def validate_file_path(file_path: str, required_extension: Optional[str] = None)
         validation_result["valid"] = False
 
     return validation_result
+
 
 def is_safe_html_content(content: str) -> bool:
 
@@ -183,12 +171,10 @@ def is_safe_html_content(content: str) -> bool:
 
     return True
 
+
 def validate_workflow_execution_state() -> Dict[str, Any]:
 
-    validation_result = {
-        "can_execute": True,
-        "errors": []
-    }
+    validation_result = {"can_execute": True, "errors": []}
 
     if not st.session_state.get(SESSION_KEY_EXECUTOR_READY, False):
         validation_result["errors"].append("Executor not ready")

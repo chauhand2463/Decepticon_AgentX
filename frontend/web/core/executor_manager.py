@@ -1,18 +1,17 @@
-
-
 import streamlit as st
-import asyncio
 from typing import Optional, Dict, Any
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+)
 
 from frontend.web.core.executor import Executor
 from src.utils.logging.logger import get_logger
 
-class ExecutorManager:
 
+class ExecutorManager:
     def __init__(self):
 
         self.executor = None
@@ -20,7 +19,10 @@ class ExecutorManager:
 
     def _ensure_executor(self):
 
-        if "direct_executor" not in st.session_state or st.session_state.direct_executor is None:
+        if (
+            "direct_executor" not in st.session_state
+            or st.session_state.direct_executor is None
+        ):
             st.session_state.direct_executor = Executor()
 
         self.executor = st.session_state.direct_executor
@@ -33,11 +35,10 @@ class ExecutorManager:
     async def initialize_with_model(self, model_info: Dict[str, Any]) -> bool:
 
         try:
-
             if "logger" not in st.session_state or st.session_state.logger is None:
                 st.session_state.logger = get_logger()
 
-            model_display_name = model_info.get('display_name', 'Unknown Model')
+            model_display_name = model_info.get("display_name", "Unknown Model")
             session_id = st.session_state.logger.start_session(model_display_name)
             st.session_state.logging_session_id = session_id
 
@@ -63,7 +64,6 @@ class ExecutorManager:
     async def initialize_default(self) -> bool:
 
         try:
-
             if "logger" not in st.session_state or st.session_state.logger is None:
                 st.session_state.logger = get_logger()
 
@@ -107,7 +107,9 @@ class ExecutorManager:
         async for event in self.executor.execute_workflow(user_input, config=config):
             yield event
 
+
 _executor_manager = None
+
 
 def get_executor_manager() -> ExecutorManager:
 

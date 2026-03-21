@@ -1,5 +1,3 @@
-
-
 ICON = "assets/logo.png"
 ICON_TEXT = "assets/logo_text1.png"
 
@@ -54,7 +52,7 @@ API_KEYS = [
     "ANTHROPIC_API_KEY",
     "OPENROUTER_API_KEY",
     "GROQ_API_KEY",
-    "GOOGLE_API_KEY"
+    "GOOGLE_API_KEY",
 ]
 
 PROVIDERS = [
@@ -64,23 +62,18 @@ PROVIDERS = [
     "Gemini",
     "Groq",
     "Ollama",
-    "OpenRouter"
+    "OpenRouter",
 ]
 
 TERMINAL_PREFIXES_TO_REMOVE = [
-    'Running command:',
-    'Executing:',
-    'Command:',
-    'Execute:',
-    '$'
+    "Running command:",
+    "Executing:",
+    "Command:",
+    "Execute:",
+    "$",
 ]
 
-TERMINAL_TOOL_KEYWORDS = [
-    "terminal",
-    "command",
-    "exec",
-    "shell"
-]
+TERMINAL_TOOL_KEYWORDS = ["terminal", "command", "exec", "shell"]
 
 COMPANY_LINK = "https://decepticon.cyber"
 

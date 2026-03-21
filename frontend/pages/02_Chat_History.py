@@ -1,5 +1,3 @@
-
-
 import streamlit as st
 import os
 import sys
@@ -18,19 +16,21 @@ app_state = get_app_state_manager()
 theme_ui = ThemeUIComponent()
 chat_history = ChatHistoryComponent()
 
+
 def main():
 
-    current_theme = "dark" if st.session_state.get('dark_mode', True) else "light"
+    current_theme = "dark" if st.session_state.get("dark_mode", True) else "light"
     theme_ui.apply_theme_css(current_theme)
 
     callbacks = {
         "on_back": _handle_back_button,
         "on_new_chat": _handle_new_chat,
         "on_replay": _handle_replay,
-        "get_export_data": _get_export_data
+        "get_export_data": _get_export_data,
     }
 
     _display_history_interface(callbacks)
+
 
 def _display_history_interface(callbacks):
 
@@ -39,7 +39,6 @@ def _display_history_interface(callbacks):
     sessions_result = history_manager.load_sessions(limit=20)
 
     if not sessions_result["success"]:
-
         retry_clicked = chat_history.show_error_state(sessions_result["error"])
         if retry_clicked:
             st.rerun()
@@ -49,13 +48,16 @@ def _display_history_interface(callbacks):
 
     chat_history.render_complete_history_page(sessions, callbacks)
 
+
 def _handle_back_button():
 
     st.switch_page("pages/01_Chat.py")
 
+
 def _handle_new_chat():
 
     st.switch_page("pages/01_Chat.py")
+
 
 def _handle_replay(session_id: str):
 
@@ -66,7 +68,6 @@ def _handle_replay(session_id: str):
     replay_result = history_manager.start_replay(session_id)
 
     if replay_result["success"]:
-
         st.session_state.replay_session_id = session_id
         st.session_state.replay_mode = True
         st.session_state.replay_completed = False
@@ -74,6 +75,7 @@ def _handle_replay(session_id: str):
         st.switch_page("pages/01_Chat.py")
     else:
         st.error(f"Failed to start replay: {replay_result['error']}")
+
 
 def _get_export_data(session_id: str) -> str:
 
@@ -84,6 +86,7 @@ def _get_export_data(session_id: str) -> str:
     except Exception as e:
         st.error(f"Export failed: {str(e)}")
         return None
+
 
 if __name__ == "__main__":
     main()

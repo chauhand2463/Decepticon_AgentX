@@ -1,20 +1,18 @@
-
-
 from dataclasses import dataclass
 from typing import Optional, Any
-from .models import load_llm_model, ModelProvider
+from .models import load_llm_model
+
 
 @dataclass
 class LLMConfig:
-
     model_name: str = "claude-3-5-sonnet-latest"
     provider: str = "anthropic"
     display_name: str = "Claude 3.5 Sonnet"
     temperature: float = 0.0
 
-class MemoryConfigManager:
 
-    _instance: Optional['MemoryConfigManager'] = None
+class MemoryConfigManager:
+    _instance: Optional["MemoryConfigManager"] = None
 
     def __new__(cls):
         if cls._instance is None:
@@ -23,7 +21,7 @@ class MemoryConfigManager:
         return cls._instance
 
     def __init__(self):
-        if not getattr(self, '_initialized', False):
+        if not getattr(self, "_initialized", False):
             self._config: Optional[LLMConfig] = None
             self._llm_instance: Optional[Any] = None
             self._initialized = True
@@ -46,14 +44,12 @@ class MemoryConfigManager:
             model_name=model_name,
             provider=provider,
             display_name=display_name,
-            temperature=0.0
+            temperature=0.0,
         )
 
         try:
             self._llm_instance = load_llm_model(
-                model_name=model_name,
-                provider=provider,
-                temperature=0.0
+                model_name=model_name, provider=provider, temperature=0.0
             )
         except Exception as e:
             print(f"Warning: Failed to load LLM model: {e}")
@@ -66,7 +62,7 @@ class MemoryConfigManager:
                 self._llm_instance = load_llm_model(
                     model_name=self._config.model_name,
                     provider=self._config.provider,
-                    temperature=0.0
+                    temperature=0.0,
                 )
             except Exception as e:
                 print(f"Warning: Failed to load LLM model: {e}")
@@ -79,7 +75,9 @@ class MemoryConfigManager:
         self._config = None
         self._llm_instance = None
 
+
 _memory_config_manager: Optional[MemoryConfigManager] = None
+
 
 def get_memory_config_manager() -> MemoryConfigManager:
 
@@ -88,26 +86,30 @@ def get_memory_config_manager() -> MemoryConfigManager:
         _memory_config_manager = MemoryConfigManager()
     return _memory_config_manager
 
+
 def get_current_llm_config() -> LLMConfig:
 
     return get_memory_config_manager().config
 
-def update_llm_config(model_name: str, provider: str, display_name: str,
-                     temperature: float = 0.0) -> None:
+
+def update_llm_config(
+    model_name: str, provider: str, display_name: str, temperature: float = 0.0
+) -> None:
 
     get_memory_config_manager().update_config(
-        model_name=model_name,
-        provider=provider,
-        display_name=display_name
+        model_name=model_name, provider=provider, display_name=display_name
     )
+
 
 def get_current_llm():
 
     return get_memory_config_manager().get_current_llm()
 
+
 def reset_config() -> None:
 
     get_memory_config_manager().reset()
+
 
 __all__ = [
     "LLMConfig",
@@ -115,5 +117,5 @@ __all__ = [
     "get_current_llm_config",
     "update_llm_config",
     "get_current_llm",
-    "reset_config"
+    "reset_config",
 ]

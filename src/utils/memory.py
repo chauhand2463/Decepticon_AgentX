@@ -1,6 +1,3 @@
-
-
-import os
 import logging
 from typing import Optional
 from langgraph.checkpoint.memory import InMemorySaver
@@ -10,6 +7,7 @@ logger = logging.getLogger(__name__)
 
 _checkpointer: Optional[InMemorySaver] = None
 _store: Optional[InMemoryStore] = None
+
 
 def get_checkpointer() -> InMemorySaver:
 
@@ -21,6 +19,7 @@ def get_checkpointer() -> InMemorySaver:
 
     return _checkpointer
 
+
 def get_store() -> InMemoryStore:
 
     global _store
@@ -31,6 +30,7 @@ def get_store() -> InMemoryStore:
 
     return _store
 
+
 def reset_persistence():
 
     global _checkpointer, _store
@@ -38,6 +38,7 @@ def reset_persistence():
     _checkpointer = None
     _store = None
     logger.info("Persistence instances reset")
+
 
 def get_persistence_status() -> dict:
 
@@ -48,25 +49,23 @@ def get_persistence_status() -> dict:
         "store_type": type(_store).__name__ if _store else None,
     }
 
+
 def create_thread_config(user_id: str, conversation_id: Optional[str] = None) -> dict:
 
     thread_id = f"user_{user_id}"
     if conversation_id:
         thread_id += f"_conv_{conversation_id}"
 
-    config = {
-        "configurable": {
-            "thread_id": thread_id,
-            "checkpoint_ns": "main"
-        }
-    }
+    config = {"configurable": {"thread_id": thread_id, "checkpoint_ns": "main"}}
 
     logger.debug(f"Created thread config: {config}")
     return config
 
+
 def create_memory_namespace(user_id: str, namespace_type: str = "memories") -> tuple:
 
     return (namespace_type, user_id)
+
 
 def get_debug_info() -> dict:
 
@@ -75,15 +74,14 @@ def get_debug_info() -> dict:
     debug_info = status.copy()
 
     if _checkpointer:
-
         debug_info["checkpointer_class"] = str(type(_checkpointer))
 
     if _store:
         debug_info["store_class"] = str(type(_store))
 
         try:
-            debug_info["store_has_index"] = hasattr(_store, 'index')
-        except:
+            debug_info["store_has_index"] = hasattr(_store, "index")
+        except Exception:
             debug_info["store_has_index"] = False
 
     return debug_info

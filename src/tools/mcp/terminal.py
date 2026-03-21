@@ -4,26 +4,30 @@ from typing import List
 import subprocess
 import uuid
 import time
-import os
 
 mcp = FastMCP("terminal", port=3003)
 
 CONTAINER_NAME = "attacker"
 
+
 def run(command: List[str]) -> subprocess.CompletedProcess:
 
     return subprocess.run(
         ["docker", "exec", CONTAINER_NAME] + command,
-        capture_output=True, text=True, encoding='utf-8'
+        capture_output=True,
+        text=True,
+        encoding="utf-8",
     )
+
 
 def tmux_run(command: List[str]) -> subprocess.CompletedProcess:
 
     return run(["tmux"] + command)
 
+
 @mcp.tool(description="Create new terminal sessions")
 def create_session(
-    session_names: Annotated[List[str], "Session names to create"]
+    session_names: Annotated[List[str], "Session names to create"],
 ) -> Annotated[List[str], "List of created session names"]:
 
     created_sessions = []
@@ -31,17 +35,25 @@ def create_session(
     for session_name in session_names:
         result = tmux_run(["new-session", "-d", "-s", session_name])
         if result.returncode != 0:
-            raise Exception(f"Failed to create session '{session_name}': {result.stderr}")
+            raise Exception(
+                f"Failed to create session '{session_name}': {result.stderr}"
+            )
         created_sessions.append(session_name)
 
     return created_sessions
+
 
 @mcp.tool(description="List all active sessions")
 def session_list() -> Annotated[List[str], "List of session IDs"]:
     result = tmux_run(["list-sessions"])
     if result.returncode != 0:
         return []
-    return [line.split(":")[0].strip() for line in result.stdout.strip().split('\n') if line.strip()]
+    return [
+        line.split(":")[0].strip()
+        for line in result.stdout.strip().split("\n")
+        if line.strip()
+    ]
+
 
 @mcp.tool(description="Execute command in session")
 def command_exec(
@@ -63,10 +75,11 @@ def command_exec(
 
         wait_result = tmux_run(["wait-for", channel])
         if wait_result.returncode != 0:
-            raise Exception(f"Command execution monitoring failed: {wait_result.stderr}")
+            raise Exception(
+                f"Command execution monitoring failed: {wait_result.stderr}"
+            )
 
         try:
-
             status_result = run(["cat", status_file])
             if status_result.returncode != 0:
                 raise Exception(f"Failed to read status file: {status_result.stderr}")
@@ -85,21 +98,23 @@ def command_exec(
             run(["rm", "-f", output_file, status_file])
 
             if exit_code != 0:
-                raise Exception(f"Command failed with exit code {exit_code}: {output.strip()}")
+                raise Exception(
+                    f"Command failed with exit code {exit_code}: {output.strip()}"
+                )
 
             return output.strip()
 
         except Exception as e:
-
             run(["rm", "-f", output_file, status_file])
             raise Exception(f"Failed to process command result: {str(e)}")
 
     except Exception as e:
         raise Exception(f"Failed to execute command: {str(e)}")
 
+
 @mcp.tool(description="Kill terminal sessions")
 def kill_session(
-    session_names: Annotated[List[str], "Session names to kill"]
+    session_names: Annotated[List[str], "Session names to kill"],
 ) -> Annotated[List[str], "Results for each session"]:
 
     results = []
@@ -110,20 +125,24 @@ def kill_session(
             if result.returncode == 0:
                 results.append(f"Session {session_name} killed successfully")
             else:
-                results.append(f"Session {session_name} killed (with warning: {result.stderr})")
+                results.append(
+                    f"Session {session_name} killed (with warning: {result.stderr})"
+                )
         except Exception as e:
             results.append(f"Failed to kill session {session_name}: {str(e)}")
 
     return results
 
+
 @mcp.tool(description="Kill server, Kill all session")
 def kill_server() -> Annotated[str, "Result"]:
     try:
         tmux_run(["kill-server"])
-        return f"Server killed"
+        return "Server killed"
 
     except Exception as e:
         return f"Server killed (with warning: {str(e)})"
+
 
 if __name__ == "__main__":
     mcp.run(transport="streamable-http")

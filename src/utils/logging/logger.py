@@ -1,5 +1,3 @@
-
-
 import json
 import uuid
 from datetime import datetime
@@ -8,16 +6,16 @@ from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
 from enum import Enum
 
-class EventType(Enum):
 
+class EventType(Enum):
     USER_INPUT = "user_input"
     AGENT_RESPONSE = "agent_response"
     TOOL_COMMAND = "tool_command"
     TOOL_OUTPUT = "tool_output"
 
+
 @dataclass
 class Event:
-
     event_type: EventType
     timestamp: str
     content: str
@@ -29,7 +27,7 @@ class Event:
         result = {
             "event_type": self.event_type.value,
             "timestamp": self.timestamp,
-            "content": self.content
+            "content": self.content,
         }
         if self.agent_name:
             result["agent_name"] = self.agent_name
@@ -40,19 +38,19 @@ class Event:
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Event':
+    def from_dict(cls, data: Dict[str, Any]) -> "Event":
         return cls(
             event_type=EventType(data["event_type"]),
             timestamp=data["timestamp"],
             content=data["content"],
             agent_name=data.get("agent_name"),
             tool_name=data.get("tool_name"),
-            tool_calls=data.get("tool_calls")
+            tool_calls=data.get("tool_calls"),
         )
+
 
 @dataclass
 class Session:
-
     session_id: str
     start_time: str
     events: List[Event]
@@ -62,23 +60,23 @@ class Session:
         result = {
             "session_id": self.session_id,
             "start_time": self.start_time,
-            "events": [event.to_dict() for event in self.events]
+            "events": [event.to_dict() for event in self.events],
         }
         if self.model:
             result["model"] = self.model
         return result
 
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Session':
+    def from_dict(cls, data: Dict[str, Any]) -> "Session":
         return cls(
             session_id=data["session_id"],
             start_time=data["start_time"],
             events=[Event.from_dict(e) for e in data["events"]],
-            model=data.get("model")
+            model=data.get("model"),
         )
 
-class Logger:
 
+class Logger:
     def __init__(self, base_path: str = "logs"):
         self.base_path = Path(base_path)
         self.base_path.mkdir(exist_ok=True)
@@ -97,10 +95,7 @@ class Logger:
         start_time = datetime.now().isoformat()
 
         self.current_session = Session(
-            session_id=session_id,
-            start_time=start_time,
-            events=[],
-            model=model_info
+            session_id=session_id, start_time=start_time, events=[], model=model_info
         )
         return session_id
 
@@ -110,11 +105,16 @@ class Logger:
             event = Event(
                 event_type=EventType.USER_INPUT,
                 timestamp=datetime.now().isoformat(),
-                content=content
+                content=content,
             )
             self.current_session.events.append(event)
 
-    def log_agent_response(self, agent_name: str, content: str, tool_calls: Optional[List[Dict[str, Any]]] = None):
+    def log_agent_response(
+        self,
+        agent_name: str,
+        content: str,
+        tool_calls: Optional[List[Dict[str, Any]]] = None,
+    ):
 
         if self.current_session:
             event = Event(
@@ -122,7 +122,7 @@ class Logger:
                 timestamp=datetime.now().isoformat(),
                 content=content,
                 agent_name=agent_name,
-                tool_calls=tool_calls
+                tool_calls=tool_calls,
             )
             self.current_session.events.append(event)
 
@@ -133,7 +133,7 @@ class Logger:
                 event_type=EventType.TOOL_COMMAND,
                 timestamp=datetime.now().isoformat(),
                 content=command,
-                tool_name=tool_name
+                tool_name=tool_name,
             )
             self.current_session.events.append(event)
 
@@ -144,7 +144,7 @@ class Logger:
                 event_type=EventType.TOOL_OUTPUT,
                 timestamp=datetime.now().isoformat(),
                 content=output,
-                tool_name=tool_name
+                tool_name=tool_name,
             )
             self.current_session.events.append(event)
 
@@ -154,14 +154,20 @@ class Logger:
             return False
 
         if not self.current_session.events or len(self.current_session.events) == 0:
-            print(f"Session {self.current_session.session_id} has no events, skipping save.")
+            print(
+                f"Session {self.current_session.session_id} has no events, skipping save."
+            )
             return False
 
         try:
             file_path = self._get_session_file_path(self.current_session.session_id)
-            with open(file_path, 'w', encoding='utf-8') as f:
-                json.dump(self.current_session.to_dict(), f, indent=2, ensure_ascii=False)
-            print(f"Session {self.current_session.session_id} saved with {len(self.current_session.events)} events.")
+            with open(file_path, "w", encoding="utf-8") as f:
+                json.dump(
+                    self.current_session.to_dict(), f, indent=2, ensure_ascii=False
+                )
+            print(
+                f"Session {self.current_session.session_id} saved with {len(self.current_session.events)} events."
+            )
             return True
         except Exception as e:
             print(f"Failed to save session: {e}")
@@ -182,7 +188,7 @@ class Logger:
         try:
             for session_file in self.base_path.rglob(f"session_{session_id}.json"):
                 if session_file.exists():
-                    with open(session_file, 'r', encoding='utf-8') as f:
+                    with open(session_file, "r", encoding="utf-8") as f:
                         session_data = json.load(f)
                     return Session.from_dict(session_data)
             return None
@@ -197,42 +203,44 @@ class Logger:
         try:
             for session_file in self.base_path.rglob("session_*.json"):
                 try:
-                    with open(session_file, 'r', encoding='utf-8') as f:
+                    with open(session_file, "r", encoding="utf-8") as f:
                         session_data = json.load(f)
 
                     session_info = {
-                        'session_id': session_data['session_id'],
-                        'start_time': session_data['start_time'],
-                        'event_count': len(session_data.get('events', [])),
-                        'file_path': str(session_file)
+                        "session_id": session_data["session_id"],
+                        "start_time": session_data["start_time"],
+                        "event_count": len(session_data.get("events", [])),
+                        "file_path": str(session_file),
                     }
 
-                    if session_data.get('model'):
-                        session_info['model'] = session_data['model']
+                    if session_data.get("model"):
+                        session_info["model"] = session_data["model"]
 
-                    events = session_data.get('events', [])
+                    events = session_data.get("events", [])
                     preview = "No user input found"
                     for event in events:
-                        if event.get('event_type') == 'user_input':
-                            preview = event.get('content', '')[:100]
-                            if len(preview) < len(event.get('content', '')):
+                        if event.get("event_type") == "user_input":
+                            preview = event.get("content", "")[:100]
+                            if len(preview) < len(event.get("content", "")):
                                 preview += "..."
                             break
 
-                    session_info['preview'] = preview
+                    session_info["preview"] = preview
                     sessions.append(session_info)
 
-                except Exception as e:
+                except Exception:
                     continue
 
-            sessions.sort(key=lambda x: x['start_time'], reverse=True)
+            sessions.sort(key=lambda x: x["start_time"], reverse=True)
 
         except Exception as e:
             print(f"Error listing sessions: {e}")
 
         return sessions[:limit]
 
+
 _logger: Optional[Logger] = None
+
 
 def get_logger() -> Logger:
 

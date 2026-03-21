@@ -1,13 +1,14 @@
-
 import streamlit as st
 from frontend.web.utils.float import float_css_helper
+
 
 class TerminalUIComponent:
     def __init__(self):
         pass
 
     def apply_terminal_css(self):
-        st.markdown("""
+        st.markdown(
+            """
             <style>
             #terminal-body::-webkit-scrollbar {
                 width: 8px;
@@ -40,7 +41,9 @@ class TerminalUIComponent:
                 margin-right: 8px;
             }
             </style>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     def create_floating_terminal(self, history):
         history_html = ""
@@ -48,7 +51,7 @@ class TerminalUIComponent:
             timestamp = entry.get("timestamp", "")
             type = entry.get("type", "output")
             content = entry.get("content", "")
-            
+
             if type == "command":
                 history_html += f'<div class="terminal-entry"><span class="terminal-timestamp">[{timestamp}]</span><span class="terminal-command">$ {content}</span></div>'
             else:
@@ -83,19 +86,22 @@ class TerminalUIComponent:
             border_radius="8px",
             box_shadow="0 20px 50px rgba(0,0,0,0.8)",
             z_index="99999",
-            transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)"
+            transition="all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)",
         )
 
-        st.markdown(f"""
+        st.markdown(
+            f"""
             <div class="st-float-container" style="{float_css}">
                 {terminal_html}
             </div>
-        """, unsafe_allow_html=True)
+        """,
+            unsafe_allow_html=True,
+        )
 
     def create_floating_toggle_button(self, is_visible: bool) -> bool:
         icon = "🐚" if is_visible else "🐚"
         text = "Hide Terminal" if is_visible else "Show Terminal"
-        
+
         float_css = float_css_helper(
             width="180px",
             height="50px",
@@ -104,25 +110,34 @@ class TerminalUIComponent:
             background="#ff4b4b" if is_visible else "#222",
             border="none",
             border_radius="25px",
-            box_shadow="0 8px 32px rgba(255, 75, 75, 0.3)" if is_visible else "0 8px 32px rgba(0, 0, 0, 0.3)",
+            box_shadow="0 8px 32px rgba(255, 75, 75, 0.3)"
+            if is_visible
+            else "0 8px 32px rgba(0, 0, 0, 0.3)",
             z_index="100000",
-            transition="all 0.3s ease"
+            transition="all 0.3s ease",
         )
-        
+
         # We use a trick: the visual button is HTML, the actual click is a Streamlit button
         # hidden or positioned exactly over it.
-        st.markdown(f"""
+        st.markdown(
+            f"""
             <div class="st-float-container" style="{float_css}; pointer-events: none;">
                 <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; gap: 8px;">
                     <span>{icon}</span> <span>{text}</span>
                 </div>
             </div>
-        """, unsafe_allow_html=True)
-        
+        """,
+            unsafe_allow_html=True,
+        )
+
         # The real button that captures clicks
         # We place it in the same spot using a Streamlit container and the same float logic if possible
         # but Streamlit's st.button is harder to float without JS.
         # For now, we'll place it in the sidebar or a consistent spot.
-        if st.sidebar.button(f"{'Hide' if is_visible else 'Show'} Terminal Shell", key="terminal_toggle_btn", use_container_width=True):
+        if st.sidebar.button(
+            f"{'Hide' if is_visible else 'Show'} Terminal Shell",
+            key="terminal_toggle_btn",
+            use_container_width=True,
+        ):
             return True
         return False

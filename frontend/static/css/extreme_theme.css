@@ -1,0 +1,137 @@
+
+/* 
+ * DECEPTICON - EXTREME LEVEL CYBER HUD
+ * Advanced Glassmorphism & Tactical UI
+ */
+
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@300;500;700&family=Fira+Code:wght@300;500&display=swap');
+
+:root {
+    --cyber-black: #020617;
+    --cyber-gray: #0f172a;
+    --cyber-blue: #38bdf8;
+    --cyber-green: #10b981;
+    --cyber-red: #ef4444;
+    --cyber-purple: #a855f7;
+    --glass-bg: rgba(15, 23, 42, 0.7);
+    --glass-border: rgba(56, 189, 248, 0.2);
+    --hud-glow: 0 0 15px rgba(56, 189, 248, 0.3);
+}
+
+/* Base Styles */
+.stApp {
+    background: transparent !important;
+    font-family: 'Rajdhani', sans-serif !important;
+}
+
+h1, h2, h3, .stHeader {
+    font-family: 'Orbitron', sans-serif !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--cyber-blue) !important;
+    text-shadow: var(--hud-glow);
+}
+
+/* Glassmorphic Containers */
+div[data-testid="stVerticalBlock"] > div:has(div.stChatMessage) {
+    background: var(--glass-bg) !important;
+    backdrop-filter: blur(12px) !important;
+    -webkit-backdrop-filter: blur(12px) !important;
+    border: 1px solid var(--glass-border) !important;
+    border-radius: 4px !important;
+    box-shadow: var(--hud-glow);
+    padding: 10px;
+    margin-bottom: 20px;
+}
+
+/* Sidebar Overhaul */
+[data-testid="stSidebar"] {
+    background-color: rgba(2, 6, 23, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border-right: 1px solid var(--glass-border) !important;
+}
+
+/* HUD Scanning Line Effect */
+.stApp::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(56, 189, 248, 0.1);
+    z-index: 1000;
+    pointer-events: none;
+    animation: scanline 8s linear infinite;
+}
+
+@keyframes scanline {
+    0% { top: -2%; }
+    100% { top: 100%; }
+}
+
+/* Glitch Animation */
+@keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
+.glitch-text:hover {
+    animation: glitch 0.3s cubic-bezier(.25,.46,.45,.94) both infinite;
+    color: var(--cyber-red) !important;
+}
+
+/* Tactical Buttons */
+button[kind="primary"], button[kind="secondary"] {
+    background: rgba(15, 23, 42, 0.8) !important;
+    border: 1px solid var(--cyber-blue) !important;
+    border-radius: 0 !important;
+    color: var(--cyber-blue) !important;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    transition: all 0.3s ease;
+    clip-path: polygon(10% 0, 100% 0, 100% 70%, 90% 100%, 0 100%, 0 30%);
+}
+
+button[kind="primary"]:hover, button[kind="secondary"]:hover {
+    background: var(--cyber-blue) !important;
+    color: var(--cyber-black) !important;
+    box-shadow: 0 0 20px var(--cyber-blue);
+    transform: scale(1.02);
+}
+
+/* Chat Message Styling */
+.stChatMessage {
+    background-color: rgba(15, 23, 42, 0.5) !important;
+    border-left: 4px solid var(--cyber-blue) !important;
+    border-radius: 0 !important;
+    margin: 10px 0 !important;
+}
+
+.stChatMessage[data-testid="stChatMessageAssistant"] {
+    border-left-color: var(--cyber-green) !important;
+}
+
+/* Status Indicators */
+.status-pill {
+    padding: 2px 8px;
+    border-radius: 2px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    border: 1px solid currentColor;
+}
+
+.status-active { color: var(--cyber-green); animation: pulse 2s infinite; }
+.status-pending { color: var(--cyber-blue); }
+.status-error { color: var(--cyber-red); }
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}

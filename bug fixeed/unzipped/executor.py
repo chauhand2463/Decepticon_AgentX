@@ -1,0 +1,264 @@
+import uuid
+from datetime import datetime
+from typing import Optional, Dict, Any, AsyncGenerator, Tuple
+
+from langchain_core.messages import HumanMessage, AIMessage, ToolMessage
+from langchain_core.runnables import RunnableConfig
+from src.graphs.swarm import create_dynamic_swarm
+# FIX: make_initial_state lives in src.swarm.graph_fixed (and is re-exported from
+#      src.graphs.swarm).  The original code imported it from src.swarm.graph_fixed
+#      directly which works, but we centralise it through the swarm module.
+from src.swarm.graph_fixed import make_initial_state
+from src.utils.llm.config_manager import (
+    update_llm_config,
+    get_current_llm_config,
+    get_current_llm,
+)
+from src.utils.message import (
+    extract_message_content,
+    parse_tool_name,
+)
+
+
+class Executor:
+    def __init__(self):
+        self._initialized = False
+        self._swarm = None
+        self._config: Optional[RunnableConfig] = None
+        self._thread_id = None
+        self._current_model = None
+        self._current_llm = None
+        self._processed_message_ids = set()
+
+    @property
+    def swarm(self):
+        return self._swarm
+
+    @property
+    def thread_id(self):
+        return self._thread_id
+
+    @property
+    def current_model(self):
+        return self._current_model
+
+    async def initialize_swarm(
+        self,
+        model_info: Optional[Dict[str, Any]] = None,
+        thread_config: Optional[Dict[str, Any]] = None,
+    ):
+        try:
+            self._initialized = False
+            self._swarm = None
+
+            if thread_config:
+                if isinstance(thread_config, dict) and "configurable" in thread_config:
+                    self._config = RunnableConfig(
+                        configurable=thread_config["configurable"]
+                    )
+                    self._thread_id = thread_config["configurable"]["thread_id"]
+                else:
+                    self._thread_id = str(uuid.uuid4())
+                    self._config = RunnableConfig(
+                        configurable={"thread_id": self._thread_id}
+                    )
+            else:
+                self._thread_id = str(uuid.uuid4())
+                self._config = RunnableConfig(
+                    configurable={"thread_id": self._thread_id}
+                )
+
+            if model_info:
+                self._current_model = model_info
+                update_llm_config(
+                    model_name=model_info["model_name"],
+                    provider=model_info["provider"],
+                    display_name=model_info["display_name"],
+                    temperature=0.0,
+                )
+
+            self._current_llm = get_current_llm()
+            self._swarm = await create_dynamic_swarm()
+            self._initialized = True
+
+            return self._thread_id
+
+        except Exception as e:
+            self._initialized = False
+            self._swarm = None
+            raise Exception(f"Swarm initialization failed: {str(e)}")
+
+    async def execute_workflow(
+        self,
+        user_input: str,
+        config: Optional[RunnableConfig] = None,
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+
+        if not self.is_ready():
+            raise Exception("Executor not ready - swarm not initialized")
+
+        if self._swarm is None:
+            raise Exception("Swarm is None - initialization failed")
+
+        execution_config: Optional[RunnableConfig] = config if config is not None else self._config
+
+        self._processed_message_ids = set()
+
+        # FIX: use make_initial_state so the messages list is constructed correctly
+        # and the duplicate-key bug in the old dict literal doesn't apply here.
+        inputs = make_initial_state(user_input)
+
+        try:
+            step_count = 0
+
+            stream_result = self._swarm.astream(
+                inputs,
+                stream_mode="updates",
+                config=execution_config,
+            )
+
+            async for stream_item in stream_result:
+                if isinstance(stream_item, tuple) and len(stream_item) == 2:
+                    namespace, output = stream_item
+                elif isinstance(stream_item, dict):
+                    namespace = ()
+                    output = stream_item
+                else:
+                    continue
+
+                step_count += 1
+
+                if not isinstance(output, dict):
+                    continue
+
+                for node, value in output.items():
+                    agent_name = node
+
+                    if (
+                        isinstance(value, dict)
+                        and "messages" in value
+                        and value["messages"]
+                    ):
+                        messages = value["messages"]
+                        if messages and isinstance(messages, list):
+                            latest_message = messages[-1]
+                            should_display, message_type = self._should_display_message(
+                                latest_message, agent_name, step_count
+                            )
+
+                            if should_display:
+                                event_data = {
+                                    "type": "message",
+                                    "message_type": message_type,
+                                    "agent_name": agent_name,
+                                    "namespace": namespace,
+                                    "content": extract_message_content(latest_message),
+                                    "raw_message": latest_message,
+                                    "step_count": step_count,
+                                    "timestamp": datetime.now().isoformat(),
+                                }
+
+                                if message_type == "tool":
+                                    tool_name = getattr(latest_message, "name", "Unknown Tool")
+                                    event_data["tool_name"] = tool_name
+                                    event_data["tool_display_name"] = parse_tool_name(
+                                        tool_name
+                                    )
+
+                                yield event_data
+
+            yield {
+                "type": "workflow_complete",
+                "step_count": step_count,
+                "timestamp": datetime.now().isoformat(),
+            }
+
+        except Exception as e:
+            yield {
+                "type": "error",
+                "error": str(e),
+                "timestamp": datetime.now().isoformat(),
+            }
+
+    def _should_display_message(
+        self, message, agent_name: str, step_count: int
+    ) -> Tuple[bool, Optional[str]]:
+
+        message_id = getattr(message, "id", None)
+        if not message_id:
+            content = extract_message_content(message)
+            message_id = f"{agent_name}_{hash(str(content))}"
+
+        if isinstance(message, HumanMessage):
+            if message_id not in self._processed_message_ids:
+                self._processed_message_ids.add(message_id)
+                return True, "user"
+            return False, None
+
+        elif isinstance(message, AIMessage):
+            if message_id not in self._processed_message_ids:
+                self._processed_message_ids.add(message_id)
+                return True, "ai"
+            return False, None
+
+        elif isinstance(message, ToolMessage):
+            if message_id not in self._processed_message_ids:
+                self._processed_message_ids.add(message_id)
+                return True, "tool"
+            return False, None
+
+        return False, None
+
+    def get_current_model_info(self) -> Dict[str, str]:
+        if self._current_model:
+            return self._current_model
+
+        try:
+            config = get_current_llm_config()
+            return {
+                "display_name": config.display_name,
+                "provider": config.provider,
+                "model_name": config.model_name,
+            }
+        except Exception:
+            return {
+                "display_name": "Unknown Model",
+                "provider": "Unknown",
+                "model_name": "unknown",
+            }
+
+    async def change_model(self, model_info: Dict[str, Any]) -> bool:
+        try:
+            self._current_model = model_info
+            update_llm_config(
+                model_name=model_info["model_name"],
+                provider=model_info["provider"],
+                display_name=model_info["display_name"],
+                temperature=0.0,
+            )
+            self._current_llm = get_current_llm()
+            self._swarm = await create_dynamic_swarm()
+            return True
+        except Exception as e:
+            raise Exception(f"Model change failed: {str(e)}")
+
+    def is_ready(self) -> bool:
+        return (
+            self._initialized
+            and self._swarm is not None
+            and hasattr(self._swarm, "astream")
+        )
+
+    def reset_session(self) -> None:
+        self._thread_id = None
+        self._config = None
+        self._processed_message_ids = set()
+        self._initialized = False
+
+    def get_state_dict(self) -> Dict[str, Any]:
+        return {
+            "initialized": self._initialized,
+            "thread_id": self._thread_id,
+            "current_model": self._current_model,
+            "has_swarm": self._swarm is not None,
+        }

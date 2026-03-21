@@ -1,12 +1,9 @@
-
-
 import streamlit as st
 import time
-from typing import Dict, Any, List, Optional, Tuple, Callable
-from frontend.web.utils.constants import PROVIDERS
+from typing import Dict, Any, List, Optional, Callable
+
 
 class ModelSelectionComponent:
-
     def __init__(self):
 
         pass
@@ -21,7 +18,7 @@ class ModelSelectionComponent:
             "Groq": {"name": "Groq"},
             "Ollama": {"name": "Ollama"},
             "Google": {"name": "Google"},
-            "OpenRouter": {"name": "OpenRouter"}
+            "OpenRouter": {"name": "OpenRouter"},
         }
         return provider_info.get(provider, {"name": provider})
 
@@ -30,11 +27,11 @@ class ModelSelectionComponent:
         with st.spinner(message):
             time.sleep(0.1)
 
-    def display_error_state(self, error_msg: str, info_msg: str = None):
+    def display_error_state(self, error_message: str, info: Optional[str] = None):
 
-        st.error(error_msg)
-        if info_msg:
-            st.info(info_msg)
+        st.error(error_message)
+        if info:
+            st.info(info)
 
     def display_success_message(self, message: str):
 
@@ -48,7 +45,7 @@ class ModelSelectionComponent:
     def render_current_model_info(self, current_model: Optional[Dict[str, Any]] = None):
 
         if current_model:
-            model_name = current_model.get('display_name', 'Unknown')
+            model_name = current_model.get("display_name", "Unknown")
             st.success(f"✅ Current Model: {model_name}")
 
             if st.button("🔄 Change Model", use_container_width=True):
@@ -59,9 +56,7 @@ class ModelSelectionComponent:
         return False
 
     def render_provider_selection(
-        self,
-        providers: List[str],
-        default_index: int = 0
+        self, providers: List[str], default_index: int = 0
     ) -> str:
 
         provider_options = []
@@ -69,7 +64,7 @@ class ModelSelectionComponent:
 
         for provider_key in providers:
             provider_info = self.get_provider_info(provider_key)
-            display_text = provider_info['name']
+            display_text = provider_info["name"]
             provider_options.append(display_text)
             provider_mapping[display_text] = provider_key
 
@@ -78,7 +73,7 @@ class ModelSelectionComponent:
             options=provider_options,
             index=default_index,
             help="Choose your service provider",
-            key="provider_selection"
+            key="provider_selection",
         )
 
         return provider_mapping[selected_provider_display]
@@ -87,7 +82,7 @@ class ModelSelectionComponent:
         self,
         models: List[Dict[str, Any]],
         selected_provider: str,
-        default_index: int = 0
+        default_index: int = 0,
     ) -> Optional[str]:
 
         if not models:
@@ -98,13 +93,18 @@ class ModelSelectionComponent:
         model_mapping = {}
 
         for model in models:
+            display_name = model.get("display_name", "Unknown Model")
 
-            display_name = model.get('display_name', 'Unknown Model')
-
-            for prefix in [f"[{selected_provider}]", f"[{selected_provider.lower()}]",
-                         f"{selected_provider}", f"{selected_provider.lower()}"]:
+            for prefix in [
+                f"[{selected_provider}]",
+                f"[{selected_provider.lower()}]",
+                f"{selected_provider}",
+                f"{selected_provider.lower()}",
+            ]:
                 if prefix in display_name:
-                    display_name = display_name.replace(f"{prefix} ", "").replace(prefix, "")
+                    display_name = display_name.replace(f"{prefix} ", "").replace(
+                        prefix, ""
+                    )
 
             model_options.append(display_name)
             model_mapping[display_name] = model
@@ -114,14 +114,16 @@ class ModelSelectionComponent:
             options=model_options,
             index=default_index,
             help="Choose the specific model variant",
-            key="model_selection"
+            key="model_selection",
         )
 
         return selected_model_display
 
     def render_initialize_button(self) -> bool:
 
-        return st.button("Initialize AI Agents", type="primary", use_container_width=True)
+        return st.button(
+            "Initialize AI Agents", type="primary", use_container_width=True
+        )
 
     def render_complete_selection_ui(
         self,
@@ -129,7 +131,7 @@ class ModelSelectionComponent:
         current_model: Optional[Dict[str, Any]] = None,
         default_provider: Optional[str] = None,
         default_model: Optional[Dict[str, Any]] = None,
-        callbacks: Optional[Dict[str, Callable]] = None
+        callbacks: Optional[Dict[str, Callable]] = None,
     ) -> Optional[Dict[str, Any]]:
 
         if callbacks is None:
@@ -148,7 +150,9 @@ class ModelSelectionComponent:
         if default_provider and default_provider in providers:
             default_provider_index = providers.index(default_provider)
 
-        selected_provider = self.render_provider_selection(providers, default_provider_index)
+        selected_provider = self.render_provider_selection(
+            providers, default_provider_index
+        )
 
         if selected_provider in providers_data:
             models = providers_data[selected_provider]
@@ -156,7 +160,7 @@ class ModelSelectionComponent:
             default_model_index = 0
             if default_model and models:
                 for idx, model in enumerate(models):
-                    if model.get('model_name') == default_model.get('model_name'):
+                    if model.get("model_name") == default_model.get("model_name"):
                         default_model_index = idx
                         break
 
@@ -165,15 +169,20 @@ class ModelSelectionComponent:
             )
 
             if selected_model_display:
-
                 selected_model = None
                 for model in models:
-                    display_name = model.get('display_name', 'Unknown Model')
+                    display_name = model.get("display_name", "Unknown Model")
 
-                    for prefix in [f"[{selected_provider}]", f"[{selected_provider.lower()}]",
-                                 f"{selected_provider}", f"{selected_provider.lower()}"]:
+                    for prefix in [
+                        f"[{selected_provider}]",
+                        f"[{selected_provider.lower()}]",
+                        f"{selected_provider}",
+                        f"{selected_provider.lower()}",
+                    ]:
                         if prefix in display_name:
-                            display_name = display_name.replace(f"{prefix} ", "").replace(prefix, "")
+                            display_name = display_name.replace(
+                                f"{prefix} ", ""
+                            ).replace(prefix, "")
 
                     if display_name == selected_model_display:
                         selected_model = model
@@ -186,12 +195,15 @@ class ModelSelectionComponent:
 
     def show_loading_screen(self, model_info: Dict[str, Any]):
 
-        provider_info = self.get_provider_info(model_info.get('provider', 'Unknown'))
+        self.get_provider_info(model_info.get("provider", "Unknown"))
 
         col1, col2, col3 = st.columns([1, 2, 1])
 
         with col2:
-            st.markdown(f"Initializing agents with {model_info.get('display_name', 'Model')}...", unsafe_allow_html=True)
+            st.markdown(
+                f"Initializing agents with {model_info.get('display_name', 'Model')}...",
+                unsafe_allow_html=True,
+            )
 
             progress_bar = st.progress(0)
             for i in range(100):
@@ -204,10 +216,10 @@ class ModelSelectionComponent:
         self,
         model_info: Dict[str, Any],
         status: str = "initializing",
-        error_message: str = None
+        error_message: Optional[str] = None,
     ):
 
-        model_name = model_info.get('display_name', 'Model')
+        model_name = model_info.get("display_name", "Model")
 
         if status == "initializing":
             with st.spinner(f"Initializing {model_name}..."):

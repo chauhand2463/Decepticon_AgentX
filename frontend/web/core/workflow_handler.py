@@ -1,18 +1,17 @@
-
-
 import streamlit as st
-import asyncio
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, Callable
 import os
 import sys
 
-sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+)
 
 from frontend.web.core.message_processor import MessageProcessor
 from frontend.web.core.executor_manager import get_executor_manager
 
-class WorkflowHandler:
 
+class WorkflowHandler:
     def __init__(self):
 
         self.message_processor = MessageProcessor()
@@ -23,16 +22,16 @@ class WorkflowHandler:
         if not self.executor_manager.is_ready():
             return {
                 "can_execute": False,
-                "error_message": "AI agents not ready. Please initialize first."
+                "error_message": "AI agents not ready. Please initialize first.",
             }
-            
+
         if "workflow_running" not in st.session_state:
             st.session_state.workflow_running = False
 
         if st.session_state.workflow_running:
             return {
                 "can_execute": False,
-                "error_message": "Another workflow is already running. Please wait."
+                "error_message": "Another workflow is already running. Please wait.",
             }
 
         return {"can_execute": True, "error_message": ""}
@@ -47,7 +46,7 @@ class WorkflowHandler:
         self,
         user_input: str,
         ui_callbacks: Dict[str, Callable] = None,
-        terminal_ui = None
+        terminal_ui=None,
     ) -> Dict[str, Any]:
 
         if ui_callbacks is None:
@@ -60,27 +59,23 @@ class WorkflowHandler:
             "event_count": 0,
             "agent_activity": {},
             "error_message": "",
-            "terminal_ui": terminal_ui
+            "terminal_ui": terminal_ui,
         }
 
         try:
             event_count = 0
-            agent_activity = {}
+            # Keep track of agent state
+            agent_activity: Dict[str, Any] = {}
 
             async for event in self.executor_manager.execute_workflow(
-                user_input,
-                config=st.session_state.thread_config
+                user_input, config=st.session_state.thread_config
             ):
                 event_count += 1
                 st.session_state.event_history.append(event)
 
                 try:
-
                     success = await self._process_event_logic(
-                        event,
-                        agent_activity,
-                        ui_callbacks,
-                        terminal_ui
+                        event, agent_activity, ui_callbacks, terminal_ui
                     )
 
                     if not success:
@@ -90,13 +85,17 @@ class WorkflowHandler:
 
                 except Exception as e:
                     if st.session_state.debug_mode:
-                        execution_result["error_message"] = f"Event processing error: {str(e)}"
+                        execution_result["error_message"] = (
+                            f"Event processing error: {str(e)}"
+                        )
 
-            execution_result.update({
-                "success": True,
-                "event_count": event_count,
-                "agent_activity": agent_activity
-            })
+            execution_result.update(
+                {
+                    "success": True,
+                    "event_count": event_count,
+                    "agent_activity": agent_activity,
+                }
+            )
 
         except Exception as e:
             execution_result["error_message"] = f"Workflow execution error: {str(e)}"
@@ -114,7 +113,7 @@ class WorkflowHandler:
         event: Dict[str, Any],
         agent_activity: Dict[str, int],
         ui_callbacks: Dict[str, Callable],
-        terminal_ui = None
+        terminal_ui=None,
     ) -> bool:
 
         event_type = event.get("type", "")
@@ -140,7 +139,7 @@ class WorkflowHandler:
         event: Dict[str, Any],
         agent_activity: Dict[str, int],
         ui_callbacks: Dict[str, Callable],
-        terminal_ui = None
+        terminal_ui=None,
     ) -> bool:
 
         frontend_message = self.message_processor.process_cli_event(event)
@@ -168,12 +167,13 @@ class WorkflowHandler:
                 content = frontend_message.get("content", "")
 
                 if tool_name and content:
-
                     terminal_ui.add_command(tool_name)
                     terminal_ui.add_output(content)
 
                     if st.session_state.get("debug_mode", False):
-                        print(f"Terminal direct update: {tool_name} -> {content[:100]}...")
+                        print(
+                            f"Terminal direct update: {tool_name} -> {content[:100]}..."
+                        )
 
             except Exception as e:
                 if st.session_state.get("debug_mode", False):
@@ -185,9 +185,7 @@ class WorkflowHandler:
         return True
 
     def _process_terminal_message_logic(
-        self,
-        frontend_message: Dict[str, Any],
-        ui_callbacks: Dict[str, Callable]
+        self, frontend_message: Dict[str, Any], ui_callbacks: Dict[str, Callable]
     ):
 
         if "terminal_messages" not in st.session_state:
@@ -202,7 +200,9 @@ class WorkflowHandler:
             if tool_name and content:
                 ui_callbacks["on_terminal_message"](tool_name, content)
 
-    def _log_message_event(self, event: Dict[str, Any], frontend_message: Dict[str, Any]):
+    def _log_message_event(
+        self, event: Dict[str, Any], frontend_message: Dict[str, Any]
+    ):
 
         if "logger" not in st.session_state or not st.session_state.logger:
             return
@@ -216,20 +216,16 @@ class WorkflowHandler:
             logger.log_agent_response(
                 agent_name=agent_name,
                 content=content,
-                tool_calls=frontend_message.get("tool_calls")
+                tool_calls=frontend_message.get("tool_calls"),
             )
         elif message_type == "tool":
             tool_name = event.get("tool_name", "Unknown Tool")
             if "command" in event:
                 logger.log_tool_command(
-                    tool_name=tool_name,
-                    command=event.get("command", content)
+                    tool_name=tool_name, command=event.get("command", content)
                 )
             else:
-                logger.log_tool_output(
-                    tool_name=tool_name,
-                    output=content
-                )
+                logger.log_tool_output(tool_name=tool_name, output=content)
 
     def _update_agent_status_logic(self):
 
@@ -242,7 +238,11 @@ class WorkflowHandler:
                     break
 
         if active_agent and active_agent != st.session_state.active_agent:
-            if st.session_state.active_agent and st.session_state.active_agent not in st.session_state.completed_agents:
+            if (
+                st.session_state.active_agent
+                and st.session_state.active_agent
+                not in st.session_state.completed_agents
+            ):
                 st.session_state.completed_agents.append(st.session_state.active_agent)
 
             st.session_state.active_agent = active_agent
@@ -257,10 +257,12 @@ class WorkflowHandler:
         return {
             "active_agent": st.session_state.active_agent,
             "completed_agents": st.session_state.completed_agents,
-            "keep_initial_ui": st.session_state.get("keep_initial_ui", True)
+            "keep_initial_ui": st.session_state.get("keep_initial_ui", True),
         }
 
+
 _workflow_handler = None
+
 
 def get_workflow_handler() -> WorkflowHandler:
 

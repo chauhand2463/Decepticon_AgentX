@@ -1,16 +1,18 @@
-﻿from typing import Any, List, Optional, Union, Dict
+from typing import Any, List
 import json
 import re
-from langchain_core.messages import BaseMessage, AIMessage, ToolMessage, SystemMessage
+from langchain_core.messages import AIMessage, SystemMessage
 from langchain_ollama import ChatOllama
 import logging
 
 logger = logging.getLogger(__name__)
 
+
 def _extract_messages(input: Any) -> Any:
     if isinstance(input, dict):
         return input.get("messages", input)
     return input
+
 
 class OllamaToolWrapper:
     def __init__(self, llm: ChatOllama):
@@ -55,9 +57,13 @@ class OllamaToolWrapper:
         tool_desc = []
         for tool in self.tools:
             if hasattr(tool, "name"):
-                tool_desc.append(f"- {tool.name}: {getattr(tool, 'description', '')} (Args: {json.dumps(getattr(tool, 'args', {}))})")
-        system_instruction = f"Use tools via JSON:\n{chr(10).join(tool_desc)}\nFormat: ```json\n{{\"action\": \"tool_name\", \"action_input\": {{\"arg\": \"val\"}}}}\n```"
-        messages = [SystemMessage(content=system_instruction)] + (list(input) if not isinstance(input, str) else [AIMessage(content=input)])
+                tool_desc.append(
+                    f"- {tool.name}: {getattr(tool, 'description', '')} (Args: {json.dumps(getattr(tool, 'args', {}))})"
+                )
+        system_instruction = f'Use tools via JSON:\n{chr(10).join(tool_desc)}\nFormat: ```json\n{{"action": "tool_name", "action_input": {{"arg": "val"}}}}\n```'
+        messages = [SystemMessage(content=system_instruction)] + (
+            list(input) if not isinstance(input, str) else [AIMessage(content=input)]
+        )
         safe_config = config if isinstance(config, dict) else {}
         response = await self.llm.ainvoke(messages, config=safe_config)
         json_match = re.search(r"```json\s*(.*?)\s*```", response.content, re.DOTALL)
@@ -67,7 +73,16 @@ class OllamaToolWrapper:
                 action = tool_data.get("action")
                 args = tool_data.get("action_input", {})
                 if action:
-                    return AIMessage(content=response.content, tool_calls=[{"name": action, "args": args, "id": f"call_{re.sub(r'[^a-zA-Z0-9]', '', action)}"}])
+                    return AIMessage(
+                        content=response.content,
+                        tool_calls=[
+                            {
+                                "name": action,
+                                "args": args,
+                                "id": f"call_{re.sub(r'[^a-zA-Z0-9]', '', action)}",
+                            }
+                        ],
+                    )
             except Exception as parse_err:
                 logger.error(f"Failed to parse fallback tool call: {parse_err}")
         return response

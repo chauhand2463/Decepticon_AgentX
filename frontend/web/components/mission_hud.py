@@ -1,6 +1,6 @@
-
 import streamlit as st
 from typing import List, Dict, Any
+
 
 class MissionHUDComponent:
     """
@@ -23,21 +23,21 @@ class MissionHUDComponent:
             status_class = f"status-{agent.get('status', 'waiting')}"
             items_html += f"""
                 <div class="hud-agent {status_class}">
-                    <div class="agent-label">{agent.get('name', 'UNKNOWN')}</div>
+                    <div class="agent-label">{agent.get("name", "UNKNOWN")}</div>
                     <div class="agent-indicator"></div>
                 </div>
             """
 
         return f"""
         <style>
-            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Orbitron:wght@400;700&family=Rajdhani:wght@400;700&display=swap');
             
             :root {{
                 --slate-950: #020617;
                 --slate-900: #0f172a;
-                --emerald-500: #10b981;
-                --amber-500: #f59e0b;
-                --rose-500: #f43f5e;
+                --cyber-blue: #38bdf8;
+                --cyber-green: #10b981;
+                --cyber-red: #ef4444;
                 --slate-400: #94a3b8;
             }}
 
@@ -45,7 +45,7 @@ class MissionHUDComponent:
                 margin: 0;
                 padding: 0;
                 background: transparent;
-                font-family: 'Inter', sans-serif;
+                font-family: 'Orbitron', 'Rajdhani', sans-serif;
                 overflow: hidden;
             }}
 
@@ -89,15 +89,16 @@ class MissionHUDComponent:
 
             /* Active State */
             .hud-agent.status-active {{
-                border-color: var(--emerald-500);
-                background: rgba(16, 185, 129, 0.1);
+                border-color: var(--cyber-blue);
+                background: rgba(56, 189, 248, 0.1);
                 transform: translateZ(20px);
-                box-shadow: 0 10px 30px -10px rgba(16, 185, 129, 0.3);
+                box-shadow: 0 0 15px rgba(56, 189, 248, 0.3);
             }}
 
             .hud-agent.status-active .agent-label {{
-                color: var(--emerald-500);
+                color: var(--cyber-blue);
                 font-weight: bold;
+                text-shadow: 0 0 5px var(--cyber-blue);
             }}
 
             .hud-agent.status-active .agent-indicator::after {{
@@ -107,7 +108,7 @@ class MissionHUDComponent:
                 left: -100%;
                 width: 100%;
                 height: 100%;
-                background: var(--emerald-500);
+                background: var(--cyber-blue);
                 animation: scan 1.5s infinite linear;
             }}
 
@@ -136,4 +137,3 @@ class MissionHUDComponent:
             {items_html}
         </div>
         """
-

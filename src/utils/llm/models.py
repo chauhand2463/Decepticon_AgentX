@@ -1,15 +1,13 @@
-﻿
-
 import json
 import os
 import requests
 from enum import Enum
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from dataclasses import dataclass
 from pathlib import Path
 
-class ModelProvider(str, Enum):
 
+class ModelProvider(str, Enum):
     OPENAI = "openai"
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
@@ -17,20 +15,21 @@ class ModelProvider(str, Enum):
     GROQ = "groq"
     GOOGLE = "google"
 
+
 @dataclass
 class ModelInfo:
-
     display_name: str
     model_name: str
     provider: ModelProvider
     api_key_available: bool = False
+
 
 def load_cloud_models() -> List[ModelInfo]:
 
     config_path = Path(__file__).parent / "cloud_config.json"
 
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             models_data = json.load(f)
 
         models = []
@@ -39,14 +38,15 @@ def load_cloud_models() -> List[ModelInfo]:
                 provider = ModelProvider(model_data["provider"])
                 api_key_available = validate_api_key(provider)
 
-                models.append(ModelInfo(
-                    display_name=model_data["display_name"],
-                    model_name=model_data["model_name"],
-                    provider=provider,
-                    api_key_available=api_key_available
-                ))
+                models.append(
+                    ModelInfo(
+                        display_name=model_data["display_name"],
+                        model_name=model_data["model_name"],
+                        provider=provider,
+                        api_key_available=api_key_available,
+                    )
+                )
             except (ValueError, KeyError):
-
                 continue
 
         return models
@@ -54,12 +54,13 @@ def load_cloud_models() -> List[ModelInfo]:
     except (FileNotFoundError, json.JSONDecodeError):
         return []
 
+
 def load_local_model_mappings() -> Dict[str, str]:
 
     config_path = Path(__file__).parent / "local_config.json"
 
     try:
-        with open(config_path, 'r', encoding='utf-8') as f:
+        with open(config_path, "r", encoding="utf-8") as f:
             models_data = json.load(f)
 
         mappings = {}
@@ -74,6 +75,7 @@ def load_local_model_mappings() -> Dict[str, str]:
 
     except (FileNotFoundError, json.JSONDecodeError):
         return {}
+
 
 def get_ollama_models_with_mappings() -> List[ModelInfo]:
 
@@ -93,12 +95,14 @@ def get_ollama_models_with_mappings() -> List[ModelInfo]:
                 else:
                     display_name = f"{model_name} (Installed)"
 
-                models.append(ModelInfo(
-                    display_name=display_name,
-                    model_name=model_name,
-                    provider=ModelProvider.OLLAMA,
-                    api_key_available=True
-                ))
+                models.append(
+                    ModelInfo(
+                        display_name=display_name,
+                        model_name=model_name,
+                        provider=ModelProvider.OLLAMA,
+                        api_key_available=True,
+                    )
+                )
 
             return models
     except requests.RequestException:
@@ -106,7 +110,9 @@ def get_ollama_models_with_mappings() -> List[ModelInfo]:
 
     return []
 
+
 _api_key_status_cache = {}
+
 
 def validate_api_key(provider: ModelProvider) -> bool:
     if provider in _api_key_status_cache:
@@ -121,10 +127,9 @@ def validate_api_key(provider: ModelProvider) -> bool:
     }
 
     if provider == ModelProvider.OLLAMA:
-
         try:
             response = requests.get("http://localhost:11434/api/tags", timeout=3)
-            status = (response.status_code == 200)
+            status = response.status_code == 200
             _api_key_status_cache[provider] = status
             return status
         except requests.RequestException:
@@ -133,29 +138,38 @@ def validate_api_key(provider: ModelProvider) -> bool:
 
     required_key = key_map.get(provider)
     key = os.getenv(required_key) if required_key else None
-    
+
     if not key:
         _api_key_status_cache[provider] = False
         return False
-        
+
     try:
         if provider == ModelProvider.OPENROUTER:
-            res = requests.get("https://openrouter.ai/api/v1/auth/key", headers={"Authorization": f"Bearer {key}"}, timeout=3)
-            status = (res.status_code == 200)
+            res = requests.get(
+                "https://openrouter.ai/api/v1/auth/key",
+                headers={"Authorization": f"Bearer {key}"},
+                timeout=3,
+            )
+            status = res.status_code == 200
             _api_key_status_cache[provider] = status
             return status
-            
+
         elif provider == ModelProvider.ANTHROPIC:
-            res = requests.get("https://api.anthropic.com/v1/models", headers={"x-api-key": key, "anthropic-version": "2023-06-01"}, timeout=3)
-            status = (res.status_code == 200)
+            res = requests.get(
+                "https://api.anthropic.com/v1/models",
+                headers={"x-api-key": key, "anthropic-version": "2023-06-01"},
+                timeout=3,
+            )
+            status = res.status_code == 200
             _api_key_status_cache[provider] = status
             return status
-            
+
     except requests.RequestException:
         pass
 
     _api_key_status_cache[provider] = True
     return True
+
 
 def check_ollama_connection() -> Dict[str, Any]:
 
@@ -167,7 +181,7 @@ def check_ollama_connection() -> Dict[str, Any]:
                 "connected": True,
                 "url": "http://localhost:11434",
                 "models": [model.get("name", "") for model in models],
-                "count": len(models)
+                "count": len(models),
             }
         else:
             return {
@@ -175,7 +189,7 @@ def check_ollama_connection() -> Dict[str, Any]:
                 "url": "http://localhost:11434",
                 "error": f"HTTP {response.status_code}",
                 "models": [],
-                "count": 0
+                "count": 0,
             }
     except requests.RequestException as e:
         return {
@@ -183,8 +197,9 @@ def check_ollama_connection() -> Dict[str, Any]:
             "url": "http://localhost:11434",
             "error": str(e),
             "models": [],
-            "count": 0
+            "count": 0,
         }
+
 
 def list_available_models() -> List[Dict[str, Any]]:
 
@@ -199,10 +214,11 @@ def list_available_models() -> List[Dict[str, Any]]:
             "display_name": model.display_name,
             "model_name": model.model_name,
             "provider": model.provider.value,
-            "api_key_available": model.api_key_available
+            "api_key_available": model.api_key_available,
         }
         for model in all_models
     ]
+
 
 def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
 
@@ -213,53 +229,44 @@ def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
 
     if provider_enum == ModelProvider.ANTHROPIC:
         from langchain_anthropic import ChatAnthropic
-        return ChatAnthropic(
-            model=model_name,
-            temperature=0
-        )
+
+        return ChatAnthropic(model=model_name, temperature=0)
 
     elif provider_enum == ModelProvider.OPENAI:
         from langchain_openai import ChatOpenAI
+
         return ChatOpenAI(
             model=model_name,
             max_tokens=4000,
         )
 
-
-
     elif provider_enum == ModelProvider.OLLAMA:
         from langchain_ollama import ChatOllama
+
         return ChatOllama(
             model=model_name,
             temperature=0,
             num_ctx=8192,
         )
 
-
-
     elif provider_enum == ModelProvider.OPENROUTER:
         from .openrouter import create_openrouter_model
-        return create_openrouter_model(
-            model_name=model_name,
-            temperature=temperature
-        )
+
+        return create_openrouter_model(model_name=model_name, temperature=temperature)
 
     elif provider_enum == ModelProvider.GROQ:
         from langchain_groq import ChatGroq
-        return ChatGroq(
-            model=model_name,
-            temperature=temperature
-        )
+
+        return ChatGroq(model=model_name, temperature=temperature)
 
     elif provider_enum == ModelProvider.GOOGLE:
         from langchain_google_genai import ChatGoogleGenerativeAI
-        return ChatGoogleGenerativeAI(
-            model=model_name,
-            temperature=temperature
-        )
+
+        return ChatGoogleGenerativeAI(model=model_name, temperature=temperature)
 
     else:
         raise ValueError(f"Unsupported provider: {provider}")
+
 
 __all__ = [
     "load_llm_model",
@@ -268,9 +275,7 @@ __all__ = [
     "check_ollama_connection",
     "ModelProvider",
     "ModelInfo",
-
     "load_cloud_models",
     "load_local_model_mappings",
-    "get_ollama_models_with_mappings"
+    "get_ollama_models_with_mappings",
 ]
-
