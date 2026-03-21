@@ -50,7 +50,7 @@ class MessageProcessor:
         event_data: Dict[str, Any],
     ) -> Dict[str, Any]:
 
-        message = {
+        message: Dict[str, Any] = {
             "type": "ai",
             "agent_id": agent_name.lower(),
             "display_name": display_name,
@@ -92,7 +92,7 @@ class MessageProcessor:
 
     def extract_agent_status(self, events: List[Dict[str, Any]]) -> Dict[str, Any]:
 
-        status = {"active_agent": None, "completed_agents": [], "current_step": 0}
+        status: Dict[str, Any] = {"active_agent": None, "completed_agents": [], "current_step": 0}
 
         for event in reversed(events):
             if event.get("type") == "message" and event.get("message_type") == "ai":

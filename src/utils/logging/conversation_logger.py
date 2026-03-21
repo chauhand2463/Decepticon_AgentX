@@ -4,6 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 from dataclasses import dataclass
+import streamlit as st
 from enum import Enum
 
 
@@ -21,14 +22,14 @@ class ConversationEvent:
     content: str
     agent_name: Optional[str] = None
     tool_name: Optional[str] = None
-    event_id: str = None
+    event_id: Optional[str] = None
 
     def __post_init__(self):
         if self.event_id is None:
             self.event_id = str(uuid.uuid4())
 
     def to_dict(self) -> Dict[str, Any]:
-        result = {
+        result: Dict[str, Any] = {
             "event_type": self.event_type.value,
             "timestamp": self.timestamp,
             "content": self.content,
@@ -58,7 +59,7 @@ class ConversationSession:
     total_events: int = 0
     total_messages: int = 0
     total_tools_used: int = 0
-    agents_used: List[str] = None
+    agents_used: Optional[List[str]] = None
 
     def __post_init__(self):
         if self.agents_used is None:
@@ -140,7 +141,7 @@ class ConversationLogger:
         agent_name: Optional[str] = None,
         tool_name: Optional[str] = None,
         **kwargs,
-    ) -> str:
+    ) -> Optional[str]:
 
         if not self.current_session:
             return None
@@ -156,17 +157,17 @@ class ConversationLogger:
         self.current_session.add_event(event)
         return event.event_id
 
-    def log_user_input(self, content: str) -> str:
+    def log_user_input(self, content: str) -> Optional[str]:
 
         return self.log_event(event_type=EventType.USER_INPUT, content=content)
 
-    def log_agent_response(self, agent_name: str, content: str, **kwargs) -> str:
+    def log_agent_response(self, agent_name: str, content: str, **kwargs) -> Optional[str]:
 
         return self.log_event(
             event_type=EventType.AGENT_RESPONSE, agent_name=agent_name, content=content
         )
 
-    def log_tool_execution(self, tool_name: str, content: str, **kwargs) -> str:
+    def log_tool_execution(self, tool_name: str, content: str, **kwargs) -> Optional[str]:
 
         return self.log_event(
             event_type=EventType.TOOL_COMMAND, tool_name=tool_name, content=content
@@ -184,7 +185,7 @@ class ConversationLogger:
             event_type=EventType.TOOL_OUTPUT, tool_name=tool_name, content=output
         )
 
-    def log_workflow_start(self, user_input: str) -> str:
+    def log_workflow_start(self, user_input: str) -> Optional[str]:
 
         return self.log_user_input(user_input)
 

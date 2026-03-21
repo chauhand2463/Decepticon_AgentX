@@ -11,6 +11,7 @@ from typing_extensions import (
     get_origin,
 )
 
+from typing import cast
 from src.utils.swarm.handoff import get_handoff_destinations
 
 
@@ -101,7 +102,7 @@ def create_swarm(
         builder.add_node(
             agent.name,
             agent,
-            destinations=tuple(get_handoff_destinations(agent)),
+            destinations=tuple(get_handoff_destinations(cast(Any, agent))),
         )
 
     return builder

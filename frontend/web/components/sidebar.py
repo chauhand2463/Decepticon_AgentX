@@ -69,7 +69,7 @@ class SidebarComponent:
         else:
             st.sidebar.warning("No model selected")
 
-    def render_navigation_buttons(self, callbacks: Dict[str, Callable] = None):
+    def render_navigation_buttons(self, callbacks: Optional[Dict[str, Callable[..., Any]]] = None):
         if callbacks is None:
             callbacks = {}
 
@@ -101,7 +101,7 @@ class SidebarComponent:
                 st.session_state.terminal_visible = not is_terminal_visible
                 st.rerun()
 
-    def render_settings_section(self, callbacks: Dict[str, Callable] = None):
+    def render_settings_section(self, callbacks: Optional[Dict[str, Callable[..., Any]]] = None):
         st.sidebar.markdown("### Systems Control")
         
         # Theme Selection

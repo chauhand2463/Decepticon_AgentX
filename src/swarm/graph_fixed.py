@@ -10,11 +10,42 @@ import json
 import re
 import asyncio
 import time
+from typing import Dict, List, Any, Optional, Union
 from typing import TypedDict, Annotated, List, Optional, Any
 from langgraph.graph import StateGraph, END, add_messages
 from langgraph.prebuilt import create_react_agent
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langchain_core.messages import HumanMessage
+from src.utils.llm.models import load_llm_model
+
+
+def _get_agent_llm(agent_key: str, default_llm: Any, mcp_config: dict) -> Any:
+    """ Resolves which LLM to use for a specific agent based on mcp_config.json overrides. """
+    agent_data = mcp_config.get(agent_key, {})
+    if not isinstance(agent_data, dict):
+        return default_llm
+
+    model_profile_key = agent_data.get("model")
+    if not model_profile_key:
+        return default_llm
+
+    models_dict = mcp_config.get("models", {})
+    profile = models_dict.get(model_profile_key)
+
+    if not profile:
+        return default_llm
+
+    try:
+        provider = profile.get("provider")
+        model_name = profile.get("model")
+        if not provider or not model_name:
+            return default_llm
+
+        print(f" [MCP] Overriding model for {agent_key}: {model_name} ({provider})")
+        return load_llm_model(model_name=model_name, provider=provider)
+    except Exception as e:
+        print(f" [WARN] Failed to load override model for {agent_key}: {e}")
+        return default_llm
 
 
 def safe_parse_json(text: str) -> dict:
@@ -206,7 +237,7 @@ def make_agent_node(agent, node_name: str):
         print(f" DECEPTICON - {node_name.upper()} STARTING")
         print(f"{'=' * 60}")
 
-        updates = {"phase": node_name}
+        updates: Dict[str, Any] = {"phase": node_name}
 
         if state.get("error"):
             updates["error"] = ""
@@ -395,10 +426,9 @@ def _extract_planner_data_safe(content: str, default_target: str = "") -> dict:
     return updates
 
 
-def _extract_recon_data_safe(content: str) -> dict:
+def _extract_recon_data_safe(content: str) -> Dict[str, Any]:
     """Extract recon data using safe JSON parsing."""
-    # FIX: was initialising wrong keys and mapping active_recon incorrectly
-    updates = {
+    updates: Dict[str, Any] = {
         "open_ports": [],
         "services": [],
         "subdomains": [],
@@ -410,49 +440,52 @@ def _extract_recon_data_safe(content: str) -> dict:
         print(f"[DEBUG] SHADOW JSON parse error: {parsed['parse_error']}")
         return updates
 
-    active = parsed.get("active_recon", {})
+    # FIX: Ensure we check common recon keys LLMs emit (reconnaissance, information_gathering, etc.)
+    active = parsed.get("active_recon", parsed.get("reconnaissance", {}))
     updates["open_ports"] = active.get("open_ports", [])
-    updates["services"] = active.get("open_ports", [])  # same source field
+    updates["services"] = active.get("services", [])
     updates["web_services"] = active.get("web_services", [])
 
-    passive = parsed.get("passive_recon", {})
+    passive = parsed.get("passive_recon", parsed.get("information_gathering", {}))
     updates["subdomains"] = passive.get("subdomains", [])
 
     return updates
 
 
-def _extract_research_data_safe(content: str) -> dict:
+def _extract_research_data_safe(content: str) -> Dict[str, Any]:
     """Extract vulnerability data using safe JSON parsing."""
-    updates = {"cves": [], "exploits": [], "attack_order": []}
+    updates: Dict[str, Any] = {"cves": [], "exploits": [], "attack_order": []}
     parsed = safe_parse_json(content)
 
     if "parse_error" in parsed:
         print(f"[DEBUG] ORACLE JSON parse error: {parsed['parse_error']}")
         return updates
 
-    updates["cves"] = parsed.get("vulnerabilities", [])
-    updates["exploits"] = parsed.get("vulnerabilities", [])
+    # FIX: Correct mapping for vulnerability fields
+    vulnerabilities = parsed.get("vulnerabilities", [])
+    updates["cves"] = vulnerabilities
+    updates["exploits"] = vulnerabilities
     updates["attack_order"] = parsed.get("attack_order", [])
 
     return updates
 
 
-def _extract_exploitation_data_safe(content: str) -> dict:
+def _extract_exploitation_data_safe(content: str) -> Dict[str, Any]:
     """Extract exploitation data using safe JSON parsing."""
-    # FIX: credentials was referenced before assignment
-    updates = {"shells": [], "credentials": [], "exploitation_success": False}
+    updates: Dict[str, Any] = {"shells": [], "credentials": [], "exploitation_success": False}
     parsed = safe_parse_json(content)
 
     if "parse_error" in parsed:
         print(f"[DEBUG] BREACH JSON parse error: {parsed['parse_error']}")
         return updates
 
+    # FIX: Initialize success variable and handle empty lists
     success = parsed.get("successful_exploits", [])
     updates["shells"] = success
     updates["exploitation_success"] = len(success) > 0
 
     for s in success:
-        if s.get("credentials_obtained"):
+        if isinstance(s, dict) and s.get("credentials_obtained"):
             updates["credentials"].extend(s["credentials_obtained"])
 
     return updates
@@ -470,11 +503,12 @@ async def _force_execution_fallback(state: DecepticonState, node_name: str) -> d
         if node_name == "shadow":
             tools = state.get("recon_tools", [])
             for tool in tools:
-                if tool.name == "nmap":
+                # FIX: use fuzzy matching since MCP adapters rename tools (e.g., nmap_full_port_scan)
+                if "nmap" in tool.name.lower():
                     print(f" [SHADOW FALLBACK] Forcing nmap scan on {target}...")
-                    res = await tool.ainvoke({"target_ip": target, "flags": "-sV -T4"})
+                    res = await tool.ainvoke({"target": target, "flags": "-sV -T4"})
                     updates.update(_extract_recon_data_safe(str(res)))
-                elif tool.name == "subfinder":
+                elif "subfinder" in tool.name.lower():
                     print(
                         f" [SHADOW FALLBACK] Forcing subdomain search for {target}..."
                     )
@@ -559,14 +593,28 @@ async def build_decepticon_graph(llm, mcp_config: dict):
         f" [DEBUG] Parallel load complete: nmap={len(nmap_tools)}, nuclei={len(nuclei_tools)}, access={len(access_tools)}"
     )
 
-    # Create agents
-    phantom = create_react_agent(llm, tools=[], prompt=PLANNER_SYSTEM_PROMPT)
-    shadow = create_react_agent(llm, tools=nmap_tools, prompt=RECON_SYSTEM_PROMPT)
-    oracle = create_react_agent(
-        llm, tools=nuclei_tools, prompt=RESEARCHER_SYSTEM_PROMPT
+    # Create agents with potential model overrides
+    phantom = create_react_agent(
+        _get_agent_llm("planner", llm, mcp_config), tools=[], prompt=PLANNER_SYSTEM_PROMPT
     )
-    breach = create_react_agent(llm, tools=access_tools, prompt=ACCESS_SYSTEM_PROMPT)
-    cipher = create_react_agent(llm, tools=[], prompt=SUMMARY_SYSTEM_PROMPT)
+    shadow = create_react_agent(
+        _get_agent_llm("reconnaissance", llm, mcp_config),
+        tools=nmap_tools,
+        prompt=RECON_SYSTEM_PROMPT,
+    )
+    oracle = create_react_agent(
+        _get_agent_llm("researcher", llm, mcp_config),
+        tools=nuclei_tools,
+        prompt=RESEARCHER_SYSTEM_PROMPT,
+    )
+    breach = create_react_agent(
+        _get_agent_llm("initial_access", llm, mcp_config),
+        tools=access_tools,
+        prompt=ACCESS_SYSTEM_PROMPT,
+    )
+    cipher = create_react_agent(
+        _get_agent_llm("summary", llm, mcp_config), tools=[], prompt=SUMMARY_SYSTEM_PROMPT
+    )
 
     # Build graph
     graph = StateGraph(DecepticonState)

@@ -1,4 +1,5 @@
 import streamlit as st
+from typing import Optional
 
 
 def float_init():
@@ -39,10 +40,10 @@ def float_init():
 def float_css_helper(
     width: str = "auto",
     height: str = "auto",
-    top: str = None,
-    bottom: str = None,
-    left: str = None,
-    right: str = None,
+    top: Optional[str] = None,
+    bottom: Optional[str] = None,
+    left: Optional[str] = None,
+    right: Optional[str] = None,
     background: str = "transparent",
     border: str = "none",
     border_radius: str = "0px",

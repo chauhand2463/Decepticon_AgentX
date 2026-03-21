@@ -36,7 +36,7 @@ class ChatHistoryComponent:
                 return True
         return False
 
-    def render_sessions_header(self, session_count: int, total_count: int = None):
+    def render_sessions_header(self, session_count: int, total_count: Optional[int] = None):
 
         st.subheader("📋 Recent Sessions")
         if total_count and total_count > session_count:
@@ -50,14 +50,14 @@ class ChatHistoryComponent:
             col1, col2 = st.columns(2)
 
             with col1:
-                date_filter = st.selectbox(
+                date_filter: str = st.selectbox(
                     "Filter by Date",
                     options=["All", "Today", "Last 7 days", "Last 30 days"],
                     index=0,
                 )
 
             with col2:
-                sort_option = st.selectbox(
+                sort_option: str = st.selectbox(
                     "Sort by",
                     options=["Newest First", "Oldest First", "Most Events"],
                     index=0,
@@ -68,7 +68,7 @@ class ChatHistoryComponent:
     def format_session_time(self, session_time: str) -> str:
 
         try:
-            dt = datetime.fromisoformat(session_time.replace("Z", "+00:00"))
+            dt: datetime = datetime.fromisoformat(session_time.replace("Z", "+00:00"))
             return dt.strftime("%Y-%m-%d %H:%M:%S")
         except Exception:
             return session_time[:19] if len(session_time) > 19 else session_time
@@ -77,28 +77,28 @@ class ChatHistoryComponent:
         self,
         session: Dict[str, Any],
         index: int,
-        callbacks: Optional[Dict[str, Callable]] = None,
+        callbacks: Optional[Dict[str, Callable[..., Any]]] = None,
     ) -> Optional[str]:
 
         if callbacks is None:
             callbacks = {}
 
-        session_id = session.get("session_id", "Unknown")
+        session_id: str = session.get("session_id", "Unknown")
 
         with st.container():
             col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
 
             with col1:
-                time_str = self.format_session_time(session.get("start_time", ""))
+                time_str: str = self.format_session_time(session.get("start_time", ""))
                 st.markdown(f"**🕒 {time_str}**")
                 st.caption(f"Session: {session_id[:16]}...")
 
-                preview_text = session.get("preview", "No user input found")
+                preview_text: str = session.get("preview", "No user input found")
                 if len(preview_text) > 100:
                     preview_text = preview_text[:100] + "..."
                 st.caption(f"💬 {preview_text}")
 
-                model_info = session.get("model")
+                model_info: Optional[str] = session.get("model")
                 if model_info:
                     st.caption(f"🤖 Model: {model_info}")
 
@@ -124,12 +124,12 @@ class ChatHistoryComponent:
 
             col1, col2, col3, col4 = st.columns([3, 1, 1, 1])
             with col4:
-                export_filename = (
+                export_filename: str = (
                     f"session_{session_id[:8]}_{datetime.now().strftime('%Y%m%d')}.json"
                 )
 
                 if "get_export_data" in callbacks:
-                    export_data = callbacks["get_export_data"](session_id)
+                    export_data: Optional[str] = callbacks["get_export_data"](session_id)
                     if export_data:
                         st.download_button(
                             label="💾 Export",
@@ -153,14 +153,14 @@ class ChatHistoryComponent:
 
     def render_session_details(self, session: Dict[str, Any]):
 
-        session_id = session.get("session_id", "Unknown")
+        session_id: str = session.get("session_id", "Unknown")
 
         with st.expander(f"Session Details - {session_id[:16]}...", expanded=True):
             col1, col2 = st.columns(2)
 
             with col1:
                 st.markdown("**Session Info:**")
-                session_info = {
+                session_info: Dict[str, Any] = {
                     "Session ID": session_id,
                     "Start Time": session.get("start_time", "Unknown"),
                     "Event Count": session.get("event_count", 0),
@@ -170,31 +170,31 @@ class ChatHistoryComponent:
 
             with col2:
                 st.markdown("**Preview:**")
-                preview = session.get("preview", "No preview available")
+                preview: str = session.get("preview", "No preview available")
                 st.text_area("Content", value=preview, height=100, disabled=True)
 
     def render_sessions_list(
         self,
         sessions: List[Dict[str, Any]],
-        callbacks: Optional[Dict[str, Callable]] = None,
+        callbacks: Optional[Dict[str, Callable[..., Any]]] = None,
     ):
 
         self.render_filter_options()
 
-        filtered_sessions = sessions
+        filtered_sessions: List[Dict[str, Any]] = sessions
 
         st.divider()
 
         for i, session in enumerate(filtered_sessions):
-            action = self.render_session_card(session, i, callbacks)
+            action: Optional[str] = self.render_session_card(session, i, callbacks)
 
             if action == "details":
                 self.render_session_details(session)
 
     def render_complete_history_page(
         self,
-        sessions: List[Dict[str, Any]] = None,
-        callbacks: Optional[Dict[str, Callable]] = None,
+        sessions: Optional[List[Dict[str, Any]]] = None,
+        callbacks: Optional[Dict[str, Callable[..., Any]]] = None,
     ):
 
         self.hide_sidebar()
@@ -221,12 +221,14 @@ class ChatHistoryComponent:
             unsafe_allow_html=True,
         )
 
-    def show_loading_state(self, message: str = "Loading sessions..."):
+    def show_loading_state(self, message: str = "Loading sessions...", callback: Optional[Callable[..., Any]] = None):
 
         with st.spinner(message):
             time.sleep(0.1)
+            if callback is not None:
+                callback()
 
-    def show_error_state(self, error_msg: str):
+    def show_error_state(self, error_msg: str) -> bool:
 
         st.error(f"Error loading sessions: {error_msg}")
 

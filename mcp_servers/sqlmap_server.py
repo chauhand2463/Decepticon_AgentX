@@ -11,6 +11,7 @@ import json
 import os
 import re
 import sys
+from typing import Dict, Any, List, Optional
 
 # FIX: datetime was used in all call_tool implementations but never imported
 from datetime import datetime
@@ -38,9 +39,9 @@ def run_command(cmd: str, timeout: int = 600) -> dict:
     return run_in_container(cmd, timeout)
 
 
-def parse_sqlmap_output(output: str) -> dict:
+def parse_sqlmap_output(output: str) -> Dict[str, Any]:
     """Extract key findings from sqlmap stdout."""
-    result = {
+    result: Dict[str, Any] = {
         "injectable": False,
         "dbms": None,
         "injection_types": [],

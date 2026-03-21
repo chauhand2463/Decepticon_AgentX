@@ -75,7 +75,7 @@
     "provider": "groq"
   },
   {
-    "display_name": "Mixtral 8x7B (Groq)",
+    "display_name": "Mixtral 8x22B (Groq)",
     "model_name": "mixtral-8x22b-32768",
     "provider": "groq"
   },

@@ -24,7 +24,7 @@ class Event:
     tool_calls: Optional[List[Dict[str, Any]]] = None
 
     def to_dict(self) -> Dict[str, Any]:
-        result = {
+        result: Dict[str, Any] = {
             "event_type": self.event_type.value,
             "timestamp": self.timestamp,
             "content": self.content,

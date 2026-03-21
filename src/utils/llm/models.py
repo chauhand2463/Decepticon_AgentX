@@ -111,7 +111,7 @@ def get_ollama_models_with_mappings() -> List[ModelInfo]:
     return []
 
 
-_api_key_status_cache = {}
+_api_key_status_cache: Dict[ModelProvider, bool] = {}
 
 
 def validate_api_key(provider: ModelProvider) -> bool:
@@ -230,14 +230,15 @@ def load_llm_model(model_name: str, provider: str, temperature: float = 0.0):
     if provider_enum == ModelProvider.ANTHROPIC:
         from langchain_anthropic import ChatAnthropic
 
-        return ChatAnthropic(model=model_name, temperature=0)
+        return ChatAnthropic(model_name=model_name, temperature=0) # type: ignore
+        # Using model_name and type: ignore because of stub conflicts
 
     elif provider_enum == ModelProvider.OPENAI:
         from langchain_openai import ChatOpenAI
 
         return ChatOpenAI(
             model=model_name,
-            max_tokens=4000,
+            model_kwargs={"max_tokens": 4000},
         )
 
     elif provider_enum == ModelProvider.OLLAMA:

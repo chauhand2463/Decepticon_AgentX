@@ -53,7 +53,7 @@ class TerminalProcessor:
     def process_frontend_messages(
         self, frontend_messages: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        terminal_entries = []
+        terminal_entries: List[Dict[str, Any]] = []
         if not frontend_messages:
             return terminal_entries
         for message in frontend_messages:
@@ -148,7 +148,7 @@ class TerminalProcessor:
     def process_structured_messages(
         self, structured_messages: List[Dict[str, Any]]
     ) -> List[Dict[str, Any]]:
-        terminal_entries = []
+        terminal_entries: List[Dict[str, Any]] = []
         if not structured_messages:
             return terminal_entries
         for message in structured_messages:

@@ -10,6 +10,7 @@ import asyncio
 import json
 import os
 import sys
+from typing import Dict, Any, List, Optional
 
 # FIX: xml.etree.ElementTree was used in parse_nmap_xml but never imported
 import xml.etree.ElementTree as ET
@@ -41,10 +42,10 @@ def parse_nmap_xml(xml_output: str) -> dict:
     """Parse nmap XML output into structured dict."""
     try:
         root = ET.fromstring(xml_output)
-        results = {"hosts": []}
+        results: Dict[str, Any] = {"hosts": []}
 
         for host in root.findall("host"):
-            host_data = {
+            host_data: Dict[str, Any] = {
                 "status": "",
                 "addresses": [],
                 "ports": [],
@@ -57,14 +58,14 @@ def parse_nmap_xml(xml_output: str) -> dict:
                 host_data["status"] = status.get("state", "unknown")
 
             for addr in host.findall("address"):
-                host_data["addresses"].append( # type: ignore
-                    {"addr": addr.get("addr"), "addrtype": addr.get("addrtype")}
-                )
+                item = {"addr": addr.get("addr"), "addrtype": addr.get("addrtype")}
+                addr_list: List[Any] = host_data["addresses"]
+                addr_list.append(item)
 
             ports_el = host.find("ports")
             if ports_el is not None:
                 for port in ports_el.findall("port"):
-                    port_data = {
+                    port_data: Dict[str, Any] = {
                         "portid": port.get("portid"),
                         "protocol": port.get("protocol"),
                         "state": "",
@@ -91,13 +92,15 @@ def parse_nmap_xml(xml_output: str) -> dict:
                             {"id": script.get("id"), "output": script.get("output", "")}
                         )
 
-                    host_data["ports"].append(port_data)
+                    ports_list: List[Any] = host_data["ports"]
+                    ports_list.append(port_data)
 
             os_el = host.find("os")
             if os_el is not None:
                 for match in os_el.findall("osmatch"):
                     osclass = match.find(".//osclass")
-                    host_data["os"].append(
+                    os_list: List[Any] = host_data["os"]
+                    os_list.append(
                         {
                             "name": match.get("name"),
                             "accuracy": match.get("accuracy"),

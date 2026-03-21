@@ -81,11 +81,11 @@ def _get_export_data(session_id: str) -> str:
 
     try:
         export_data = history_manager.prepare_export_data(session_id)
-        return export_data
+        return export_data if export_data else ""
 
     except Exception as e:
         st.error(f"Export failed: {str(e)}")
-        return None
+        return ""
 
 
 if __name__ == "__main__":
